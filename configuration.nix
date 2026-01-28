@@ -78,8 +78,8 @@
   };
 
   time.timeZone = "Europe/Moscow";
-  i18n.defaultLocale = "en_US.UTF-8";
-  i18n.extraLocales = [ "ru_ru.UTF-8" ];
+  i18n.defaultLocale = "en_US.UTF-8/UTF-8";
+  i18n.extraLocales = [ "ru_RU.UTF-8/UTF-8" ];
 
   hardware.bluetooth = {
     enable = true;
@@ -214,6 +214,7 @@
     zsh
   ];
 
+  # TODO: configure zsh in home.nix
   # Set default shell for all users
   users.defaultUserShell = pkgs.zsh;
 
@@ -222,7 +223,7 @@
     fontDir.enable = true;
 
     # Use specified fonts in `defaultFonts` below
-    enableDefaultFonts = false;
+    enableDefaultPackages = false;
 
     packages = [
       inputs.aporetic-nerd-font.packages.${pkgs.system}.default
@@ -241,10 +242,10 @@
 
     # User defined default fonts
     fontconfig.defaultFonts = {
-      serif = [ "AporeticSerifMonoNerdFont-Regular" ];
-      sansSerif = [ "AporeticSansMonoNerdFont-Regular" ];
-      monospace = [ "AporeticSerifMonoNerdFont-Regular" ];
-      emoji = [ "AporeticSerifMonoNerdFont-Regular" ];
+      serif = [ "AporeticSerifMonoNerdFont", "Noto Serif" ];
+      sansSerif = [ "AporeticSansMonoNerdFont", "Noto Sans" ];
+      monospace = [ "AporeticSerifMonoNerdFont", "JetBrainsMono Nerd Font" ];
+      emoji = [ "Noto Color Emoji" ];
     };
   };
 
@@ -263,7 +264,7 @@
     };
   };
 
-  # Convinient manager for firmware updates
+  # Convenient manager for firmware updates
   # https://nixos.wiki/wiki/Fwupd
   services.fwupd.enable = true;
 

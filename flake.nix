@@ -171,18 +171,18 @@
 #    sudo nix flake update  # Generate flake.lock
 #
 # 2. Build and switch:
-#    sudo nixos-rebuild switch --flake .#nixos
-#    # The ".#nixos" means:
+#    sudo nixos-rebuild switch --flake .#<main or secondary>
+#    # The ".#<main or secondary>" means:
 #    #   . = current directory (where flake.nix is)
-#    #   #nixos = the configuration name from nixosConfigurations
+#    #   #<main or secondary> = the configuration name from nixosConfigurations
 #
 # 3. Update dependencies:
 #    sudo nix flake update  # Updates all inputs to latest versions
 #    sudo nix flake update nixpkgs  # Update only nixpkgs
-#    sudo nixos-rebuild switch --flake .#nixos
+#    sudo nixos-rebuild switch --flake .#<main or secondary>
 #
 # 4. Rollback if something breaks:
-#    sudo nixos-rebuild switch --flake .#nixos --rollback
+#    sudo nixos-rebuild switch --flake .#<main or secondary> --rollback
 #    # Or just reboot and select previous generation from bootloader
 #
 # FLAKE.LOCK FILE
@@ -235,7 +235,7 @@
 # New way (flakes):
 #   cat /etc/nixos/flake.lock  # See what versions you have
 #   sudo nix flake update
-#   sudo nixos-rebuild switch --flake /etc/nixos#nixos
+#   sudo nixos-rebuild switch --flake /etc/nixos#<main or secondary>
 #
 # The flake inputs replace channels entirely.
 
