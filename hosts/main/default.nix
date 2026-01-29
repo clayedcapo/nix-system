@@ -1,8 +1,18 @@
+# =============================================================================
+# HOST: main
+# =============================================================================
+# Main laptop: AMD CPU + NVIDIA GPU (16GB RAM)
+# Hardware-specific configuration for performance-oriented setup.
+
 { config, pkgs, ... }:
 {
   imports = [
     ./hardware-configuration.nix
   ];
+
+  # ===========================================================================
+  # DISK ENCRYPTION (LUKS)
+  # ===========================================================================
 
   # SSD specific. Allows TRIM through encryptions layer, but
   # WARN: slightly reduces security (blocks could be identified in theory)
@@ -13,11 +23,19 @@
     bypassWorkqueues = true;
   };
 
+  # ===========================================================================
+  # TEMPORARY FILES
+  # ===========================================================================
+
   # WARN: This is experimental. On any RAM problems consider to change.
   boot.tmp = {
     useZram = true;
     zramSettings.zram-size = "ram * 0.14";
   };
+
+  # ===========================================================================
+  # MEMORY MANAGEMENT
+  # ===========================================================================
 
   # Those two kernel parameters fine tune swap space for zram
   boot.kernel.sysctl = {
@@ -27,6 +45,10 @@
   };
 
   zramSwap.memoryPercent = 40;
+
+  # ===========================================================================
+  # SSD MAINTENANCE
+  # ===========================================================================
 
   # Periodic TRIM in the background
   services.fstrim.enable = true;

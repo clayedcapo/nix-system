@@ -1,3 +1,9 @@
+# =============================================================================
+# SHARED SYSTEM CONFIGURATION
+# =============================================================================
+# This file contains configuration shared between all hosts.
+# Host-specific settings are in ./hosts/<hostname>/
+
 { config, pkgs, lib, inputs, pkgs-unstable, username, hostname, ... }:
 # ^
 # | These are the arguments passed to this module:
@@ -12,6 +18,10 @@
 {
   # Here should be specified all additional modules that are shared among all systems
   # imports = [ ];
+
+  # ===========================================================================
+  # NIX SETTINGS
+  # ===========================================================================
 
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];
@@ -28,7 +38,12 @@
     options = "--delete-older-than 14d";
   };
 
-  # Boot loader
+  nixpkgs.config.allowUnfree = true;
+
+  # ===========================================================================
+  # BOOT
+  # ===========================================================================
+
   boot.loader = {
     systemd-boot = {
       enable = true;
@@ -49,6 +64,10 @@
   # Allows to mount any removable disks with supported filesystems.
   boot.supportedFilesystems = [ "btrfs" "ext4" "vfat" "ntfs" ];
 
+  # ===========================================================================
+  # MEMORY & SWAP
+  # ===========================================================================
+
   # Zram swap. Memory usage is defined per host specifically.
   zramSwap.enable = true;
 
@@ -61,6 +80,10 @@
       priority = -1;
     }
   ];
+
+  # ===========================================================================
+  # NETWORKING
+  # ===========================================================================
 
   networking = {
     hostName = hostname;
@@ -77,17 +100,32 @@
     networkmanager.wifi.powersave = false;
   };
 
+  # ===========================================================================
+  # LOCALIZATION
+  # ===========================================================================
+
   time.timeZone = "Europe/Moscow";
   i18n.defaultLocale = "en_US.UTF-8/UTF-8";
   i18n.extraLocales = [ "ru_RU.UTF-8/UTF-8" ];
 
+  # ===========================================================================
+  # HARDWARE
+  # ===========================================================================
+
+  # -------------------------------------------------------------------------
+  # Bluetooth
+  # -------------------------------------------------------------------------
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
   };
 
+  # -------------------------------------------------------------------------
+  # Audio (PipeWire)
+  # -------------------------------------------------------------------------
   # Conflicts with PipeWire
   hardware.pulseaudio.enable = false;
+
   # RealtimeKit system service, which hands out realtime scheduling priority to user processes on demand.
   security.rtkit.enable = true;
 
@@ -98,6 +136,10 @@
     pulse.enable = true;
     jack.enable = true;
   };
+
+  # ===========================================================================
+  # POWER MANAGEMENT
+  # ===========================================================================
 
   # Backlight non-root control
   programs.light.enable = true;
@@ -113,6 +155,10 @@
   #   enable = true;
   #   cpuFreqGovernor = "powersave";
   # };
+
+  # ===========================================================================
+  # DESKTOP ENVIRONMENT (Sway/Wayland)
+  # ===========================================================================
 
   # Links `/libexec` from derivations to `/run/current-system/sw`
   # `/libexec` contains helper internal executables, that are not meant for direct user execution,
@@ -169,6 +215,10 @@
     # xdgOpenUsePortal = true;
   };
 
+  # ===========================================================================
+  # USERS
+  # ===========================================================================
+
   # Using username variable from flake.nix
   users.users.${username} = {
     isNormalUser = true;
@@ -180,7 +230,13 @@
     ];
   };
 
-  nixpkgs.config.allowUnfree = true;
+  # Set default shell for all users
+  # TODO: configure zsh in home.nix
+  users.defaultUserShell = pkgs.zsh;
+
+  # ===========================================================================
+  # PACKAGES
+  # ===========================================================================
 
   environment.systemPackages = with pkgs; [
     # Basic utilities
@@ -214,9 +270,9 @@
     zsh
   ];
 
-  # TODO: configure zsh in home.nix
-  # Set default shell for all users
-  users.defaultUserShell = pkgs.zsh;
+  # ===========================================================================
+  # FONTS
+  # ===========================================================================
 
   fonts = {
     # Create a directory with links to all fonts in /run/current-system/sw/share/X11/fonts
@@ -227,7 +283,7 @@
 
     packages = [
       inputs.aporetic-nerd-font.packages.${pkgs.system}.default
-    ] ++ (with pkgs: [
+    ] ++ (with pkgs; [
       (nerdfonts.override {
         fonts = [
           "JetBrainsMono"
@@ -242,18 +298,28 @@
 
     # User defined default fonts
     fontconfig.defaultFonts = {
-      serif = [ "AporeticSerifMonoNerdFont", "Noto Serif" ];
-      sansSerif = [ "AporeticSansMonoNerdFont", "Noto Sans" ];
-      monospace = [ "AporeticSerifMonoNerdFont", "JetBrainsMono Nerd Font" ];
+      serif = [ "AporeticSerifMonoNerdFont" "Noto Serif" ];
+      sansSerif = [ "AporeticSansMonoNerdFont" "Noto Sans" ];
+      monospace = [ "AporeticSerifMonoNerdFont" "JetBrainsMono Nerd Font" ];
       emoji = [ "Noto Color Emoji" ];
     };
   };
+
+  # ===========================================================================
+  # SECURITY
+  # ===========================================================================
 
   security.polkit.enable = true;
 
   # TODO: Security: Consider using keyring
 
-  # OpenSSH daemon
+  # ===========================================================================
+  # SERVICES
+  # ===========================================================================
+
+  # -------------------------------------------------------------------------
+  # OpenSSH
+  # -------------------------------------------------------------------------
   services.openssh = {
     enable = true;
     settings = {
@@ -264,11 +330,16 @@
     };
   };
 
+  # -------------------------------------------------------------------------
+  # Firmware Updates
+  # -------------------------------------------------------------------------
   # Convenient manager for firmware updates
   # https://nixos.wiki/wiki/Fwupd
   services.fwupd.enable = true;
 
-  # Daemon for keyboard remaps
+  # -------------------------------------------------------------------------
+  # Keyboard Remapping
+  # -------------------------------------------------------------------------
   services.keyd = {
     enable = true;
     keyboards = {
@@ -284,16 +355,27 @@
     };
   };
 
+  # -------------------------------------------------------------------------
+  # Flatpak
+  # -------------------------------------------------------------------------
   # https://flatpak.org/setup/NixOS
   services.flatpak.enable = true;
+
+  # ===========================================================================
+  # STATE VERSION
+  # ===========================================================================
 
   # DON'T CHANGE after initial installation
   # This ensures system compatibility across upgrades
   system.stateVersion = "24.11";
 }
 
+# =============================================================================
+# TIPS & TRICKS
+# =============================================================================
+#
 # USING UNSTABLE PACKAGES
-# =======================
+# -----------------------
 # You can selectively use packages from nixpkgs-unstable:
 #
 # Option 1: In systemPackages
@@ -314,29 +396,19 @@
 #     pkgs.firefox
 #     pkgs-unstable.vscode
 #   ];
-
+#
 # MODULAR CONFIGURATION
-# =====================
+# ---------------------
 # As your config grows, you can split it into modules:
 #
-# /etc/nixos/
-# ├── flake.nix
-# ├── configuration.nix        # Main config (this file)
-# ├── hardware-configuration.nix
-# └── modules/
-#     ├── nvidia.nix           # NVIDIA-specific config
-#     ├── gaming.nix           # Gaming setup
-#     └── development.nix      # Dev tools
+# ./modules/
+# ├── nvidia.nix           # NVIDIA-specific config
+# ├── gaming.nix           # Gaming setup
+# └── development.nix      # Dev tools
 #
-# Then import in flake.nix:
-#   modules = [
-#     ./configuration.nix
-#     ./modules/nvidia.nix
-#     ./modules/gaming.nix
-#   ];
-#
-# Or import in configuration.nix:
+# Then import in configuration.nix:
 #   imports = [
 #     ./modules/nvidia.nix
 #     ./modules/gaming.nix
 #   ];
+
