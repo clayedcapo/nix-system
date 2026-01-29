@@ -1,9 +1,8 @@
 # =============================================================================
 # SHARED SYSTEM CONFIGURATION
 # =============================================================================
-# This file contains configuration shared between all hosts.
+# This file contains configuration shared between all hosts
 # Host-specific settings are in ./hosts/<hostname>/
-
 { config, pkgs, lib, inputs, pkgs-unstable, username, hostname, ... }:
 # ^
 # | These are the arguments passed to this module:
@@ -14,15 +13,13 @@
 # | - pkgs-unstable: Unstable package set (from specialArgs)
 # | - username: Your username (from specialArgs)
 # | - hostname: Your hostname (from specialArgs)
-
 {
   # Here should be specified all additional modules that are shared among all systems
   # imports = [ ];
-
+  #
   # ===========================================================================
   # NIX SETTINGS
   # ===========================================================================
-
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];
 
@@ -38,12 +35,15 @@
     options = "--delete-older-than 14d";
   };
 
+  # Allow non-free packages
   nixpkgs.config.allowUnfree = true;
+
+  # Remove channel related tools and configs
+  nix.channel.enable = false;
 
   # ===========================================================================
   # BOOT
   # ===========================================================================
-
   boot.loader = {
     systemd-boot = {
       enable = true;
@@ -52,7 +52,7 @@
     efi.canTouchEfiVariables = true;
   };
 
-  # Delete after disko/hardware configuration
+  # TODO: Delete after disko/hardware configuration
   # Kernel parameters for LUKS
   # boot.initrd.luks.devices = {
   #   cryptroot = {
@@ -60,14 +60,13 @@
   #     bypassWorkqueues = true;
   #   };
   # };
-
+  #
   # Allows to mount any removable disks with supported filesystems.
   boot.supportedFilesystems = [ "btrfs" "ext4" "vfat" "ntfs" ];
 
   # ===========================================================================
   # MEMORY & SWAP
   # ===========================================================================
-
   # Zram swap. Memory usage is defined per host specifically.
   zramSwap.enable = true;
 
@@ -84,7 +83,6 @@
   # ===========================================================================
   # NETWORKING
   # ===========================================================================
-
   networking = {
     hostName = hostname;
     networkmanager.enable = true;
@@ -103,7 +101,6 @@
   # ===========================================================================
   # LOCALIZATION
   # ===========================================================================
-
   time.timeZone = "Europe/Moscow";
   i18n.defaultLocale = "en_US.UTF-8/UTF-8";
   i18n.extraLocales = [ "ru_RU.UTF-8/UTF-8" ];
@@ -111,7 +108,8 @@
   # ===========================================================================
   # HARDWARE
   # ===========================================================================
-
+  # Hardware options are machine specific primarily. See in `./hosts`
+  #
   # -------------------------------------------------------------------------
   # Bluetooth
   # -------------------------------------------------------------------------
@@ -126,7 +124,7 @@
   # Conflicts with PipeWire
   hardware.pulseaudio.enable = false;
 
-  # RealtimeKit system service, which hands out realtime scheduling priority to user processes on demand.
+  # RealtimeKit system service, which hands out realtime scheduling priority to user processes on demand
   security.rtkit.enable = true;
 
   services.pipewire = {
@@ -135,12 +133,12 @@
     alsa.support32Bit = true;
     pulse.enable = true;
     jack.enable = true;
+    wireplumber.enable = true;
   };
 
   # ===========================================================================
   # POWER MANAGEMENT
   # ===========================================================================
-
   # Backlight non-root control
   programs.light.enable = true;
 
@@ -150,23 +148,22 @@
   # DBus interface for apps for power management
   services.upower.enable = true;
 
-  # See if hardware-configuration.nix enables it
+  # TODO: See if hardware-configuration.nix enables it
   # powerManagement = {
   #   enable = true;
   #   cpuFreqGovernor = "powersave";
   # };
-
+  #
   # ===========================================================================
   # DESKTOP ENVIRONMENT (Sway/Wayland)
   # ===========================================================================
-
   # Links `/libexec` from derivations to `/run/current-system/sw`
   # `/libexec` contains helper internal executables, that are not meant for direct user execution,
   # but binaries that depend on those helpers can look specifically for symlinks and will fail without them
   environment.pathsToLink = [ "/libexec" ];
 
-  # Despite a name, also maybe needed by wayland compositors
-  services.xserver.enable = true;
+  # NOTE: Despite a name, also maybe needed by wayland compositors, enable after testing if needed
+  # services.xserver.enable = true;
 
   programs.sway = {
     enable = true;
@@ -211,16 +208,38 @@
     # GTK specific interfaces
     extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
     # Makes all `xdg-open` calls go through portals, even for non sandboxed apps
-    # Consider using it ONLY when running a lot of binaries through FHS envs.
+    # Consider using it ONLY when running a lot of binaries through FHS envs
     # xdgOpenUsePortal = true;
+
+    config.common.default = [ "gtk" ];
   };
+
+  xdg = {
+    mime.enable = true;    # file associations - essential
+    icons.enable = true;   # icon themes - needed for GUI apps
+
+    # Skip these for Sway:
+    # autostart.enable = true;  # Sway uses exec mechanism
+    # menus.enable = true;      # not used by tofi/wofi
+  };
+
+
+  # TODO: Move it to home.nix
+  # Enable relatively new (hence not always supported) specification for a standardized way to
+  # launch user's preferred terminal.
+  # xdg.terminal-exec = {
+  #   enable = true;
+  #   settings = {
+  #     default = [ "alacritty" ];
+  #   };
+  # };
 
   # ===========================================================================
   # USERS
   # ===========================================================================
-
   # Using username variable from flake.nix
   users.users.${username} = {
+    home = "/home/${username}";
     isNormalUser = true;
     extraGroups = [
       "wheel"
@@ -237,32 +256,111 @@
   # ===========================================================================
   # PACKAGES
   # ===========================================================================
-
   environment.systemPackages = with pkgs; [
     # Basic utilities
-    vim
+    zsh
+    helix
     git
-    wget
-    curl
-    # vivaldi
+    gnumake # make build system
+    just # command runner, substitutes make, simpler
+    fastfetch
 
-    btop
-    iotop # io monitoring
-    iftop # network monitoring
+    # System tools
     pciutils # lspci
     usbutils # lsusb
+    psmisc # tools that use /proc filesystem: `fuser`, `killall`, `peekfd`, `prtstat`, `pslog`, `pstree`
+    ethtool
+    hdparm # for ATA/SATA maintainence
+    gptfdisk # `cgdisk`, `fixparts`, `gdisk`, `sgdisk`
+
+    # Monitoring
+    btop
+    strace # syscall tracer
+    ltrace # dynamic libcall tracer
+    iotop-c # io monitoring
+    iftop # network monitoring
+    procs # modern ps
+    lsof # tool to list open files
+    systat # provides `cifsiostat`, `iostat`, `mpstat`, `pidstat`, `sadf`, `sar`, `tapestat`
+    sysbench # scriptable multi-threaded benchmark tool based on LuaJIT
+    systemctl-tui
+
+    # Text Processing
+    gnugrep # GNU grep, provides `grep`, `egrep`, `fgrep` commands
+    gawk # GNU awk, a pattern scanning and processing language
+    gnutar # GNU implementation of the `tar` archiver
+    gnused # GNU sed, very powerful (mainly for replacing text in files)
+    findutils # `find`, `locate`, `updatedb`, `xargs`
+    jq
+    yq-go # YAML processor
+    jc # serializer of popular cmd tools' outputs to JSON
+    duf # disk usage/free utility - a better 'df' alternative
+    sad # sed replacement, with diffs
+    fzf
+    fd
+    ripgrep
+    dust # du replacement
+
+    # Archives
+    zip
+    xz
+    zstd
+    unzipNLS # provides `funzip`, `unzip`, `unzipsfx`, `zipgrep`, `zipinfo` commands
+    p7zip
+
+    # Networking
+    wget
+    curl
+    dnsutils
+    mtr # `ping` and `traceroute` in one util
+    gping # `ping` with graph
+    doggo # DNS-client, replacement for `dig`
+    # httpie
+    # curlie # curl with httpie
+    aria2 # versatile multi-protocol downloader (https://aria2.github.io)
+    socat # `netcat` replacement
+    iperf # tool to measure IP bandwidth using UDP or TCP
+    tcpdump # network sniffer
+
+    # eBPF tools (https://ebpf.io/what-is-ebpf/)
+    bpftrace
+    bpftop
+    bpfmon
+
+    # Benchmarking
+    hyperfine
 
     # Graphics info tools
-    glxinfo
+    # glxinfo
     vulkan-tools
     nvtop
+
+    # File transfer
+    rsync
+    croc # file transfer between computers securely and easily
+
+    # Security
+    argon2 # password-hashing function
+    openssl
+
+    # Miscellaneous
+    file # show file type
+    which
+    tree
+    tealdeer # fast tldr version
 
     # EXAMPLE: Using unstable packages for specific tools
     # pkgs-unstable.neovim  # Get latest neovim from unstable
   ];
 
-  # TODO: In user settings set to `helix`
-  environment.variables.EDITOR = "vim";
+  # BCC - Tools for BPF-based Linux IO analysis, networking, monitoring, and more
+  # https://github.com/iovisor/bcc
+  programs.bcc.enable = true;
+
+  # ===========================================================================
+  # ENVIRONMENT
+  # ===========================================================================
+  environment.variables.EDITOR = "helix";
 
   # Add specific shells to /etc/shells to be able to log with them
   environment.shells = with pkgs; [
@@ -270,10 +368,14 @@
     zsh
   ];
 
+  # Will make many terminal types available system-wide in terminfo database
+  # NOTE: Probably not needed, but in case of using new modern terminal can help with different errors related to
+  # inability to query terminfo on those terminals by programs like helix, tmux and etc.
+  environment.enableAllTerminfo = true;
+
   # ===========================================================================
   # FONTS
   # ===========================================================================
-
   fonts = {
     # Create a directory with links to all fonts in /run/current-system/sw/share/X11/fonts
     fontDir.enable = true;
@@ -308,15 +410,14 @@
   # ===========================================================================
   # SECURITY
   # ===========================================================================
-
   security.polkit.enable = true;
 
   # TODO: Security: Consider using keyring
-
+  #
   # ===========================================================================
   # SERVICES
   # ===========================================================================
-
+  #
   # -------------------------------------------------------------------------
   # OpenSSH
   # -------------------------------------------------------------------------
@@ -364,12 +465,10 @@
   # ===========================================================================
   # STATE VERSION
   # ===========================================================================
-
   # DON'T CHANGE after initial installation
   # This ensures system compatibility across upgrades
   system.stateVersion = "24.11";
 }
-
 # =============================================================================
 # TIPS & TRICKS
 # =============================================================================

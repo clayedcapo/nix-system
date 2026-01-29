@@ -1,27 +1,37 @@
 # =============================================================================
 # GPU CONFIGURATION: AMD (integrated) + NVIDIA (discrete)
 # =============================================================================
-# PRIME offload configuration for hybrid graphics.
-# AMD iGPU is primary (power saving), NVIDIA dGPU on demand (performance).
-
+# PRIME offload configuration for hybrid graphics
+# AMD iGPU is primary (power saving), NVIDIA dGPU on demand (performance)
 { config, pkgs, ... }:
 {
   # ===========================================================================
   # KERNEL MODULES
   # ===========================================================================
-
   boot.initrd.kernelModules = [ "amdgpu" ];
 
   # ===========================================================================
   # VIDEO DRIVERS
   # ===========================================================================
-
   services.xserver.videoDrivers = [ "nvidia" ];
+
+  # ===========================================================================
+  # NVIDIA KERNEL PARAMETERS
+  # ===========================================================================
+  # Enables framebuffer device emulation through DRM driver (/dev/fb* device backed by NVIDIA GPU)
+  # Required for:
+  #   - Native resolution TTY consoles
+  #   - Boot splash (plymouth) on NVIDIA
+  #   - Framebuffer tools (fbgrab, fbterm)
+  #   - Proper suspend/resume of console state
+  # Without this, TTYs fall back to low resolution (1024x768 or similar).
+  # Requires driver 545+ and modeset=1.
+  boot.kernelParams = [ "nvidia-drm.fbdev=1" ];
+
 
   # ===========================================================================
   # NVIDIA CONFIGURATION
   # ===========================================================================
-
   hardware.nvidia = {
     # Use open-source kernel modules (for RTX 20 series and newer)
     open = true;
@@ -31,6 +41,15 @@
 
     # Specific driver package to use
     package = config.boot.kernelPackages.nvidiaPackages.stable;
+
+    # Kernel Mode Setting (KMS) moves display mode configuration from userspace into the kernel's DRM subsystem.
+    # Required for:
+    #   - Wayland compositors (Sway, GNOME, KDE)
+    #   - Seamless boot/TTY/desktop transitions (no flicker)
+    #   - PRIME synchronization for hybrid GPU setups
+    #   - Hardware cursor support
+    # Without this, NVIDIA is limited to legacy X11 userspace modesetting.
+    modesetting.enable = true;
 
     # -------------------------------------------------------------------------
     # PRIME Offload
@@ -57,10 +76,12 @@
     dynamicBoost.enable = true;
   };
 
+  # TODO: Explore after configuring virtualization and OCI containers
+  # hardware.nvidia-container-toolkit.enable
+
   # ===========================================================================
   # GRAPHICS (OpenGL/Vulkan)
   # ===========================================================================
-
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
@@ -76,16 +97,24 @@
   };
 
   # ===========================================================================
+  # PACKAGES
+  # ===========================================================================
+  environment.systemPackages = with pkgs; [
+    nvtopPackages.nvidia # htop-like task monitor
+    nvtopPackages.amd
+  ];
+
+  # ===========================================================================
   # CPU MICROCODE
   # ===========================================================================
-
-  # See if hardware-configuration.nix add it
+  #
+  # TODO: See if hardware-configuration.nix add it
   # hardware.cpu.amd.updateMicrocode = true;
-
+  #
   # ===========================================================================
   # WAYLAND (Sway) WORKAROUNDS
   # ===========================================================================
-
+  #
   # NVIDIA specific env variables
   programs.sway.extraSessionCommands = ''
     export WLR_NO_HARDWARE_CURSORS=1

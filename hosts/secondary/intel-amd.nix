@@ -1,27 +1,23 @@
 # =============================================================================
 # GPU CONFIGURATION: Intel (integrated) + AMD (discrete)
 # =============================================================================
-# Intel iGPU as primary display adapter.
-
+# Intel iGPU as primary display adapter
 { config, pkgs, ... }:
 {
   # ===========================================================================
   # KERNEL MODULES
   # ===========================================================================
-
   # Intel integrated + AMD discrete
   boot.initrd.kernelModules = [ "i915" "amdgpu" ];
 
   # ===========================================================================
   # VIDEO DRIVERS
   # ===========================================================================
-
   services.xserver.videoDrivers = [ "modesetting" "amdgpu" ];
 
   # ===========================================================================
   # GRAPHICS (OpenGL/Vulkan)
   # ===========================================================================
-
   # Intel GPU as primary
   hardware.graphics = {
     enable = true;
@@ -39,9 +35,16 @@
   };
 
   # ===========================================================================
+  # PACKAGES
+  # ===========================================================================
+  environment.systemPackages = with pkgs; [
+    nvtopPackages.intel # htop-like task monitor
+    nvtopPackages.amd
+  ];
+
+  # ===========================================================================
   # ENVIRONMENT VARIABLES
   # ===========================================================================
-
   # Intel-specific settings
   environment.variables = {
     VDPAU_DRIVER = "va_gl";
@@ -50,10 +53,6 @@
   # ===========================================================================
   # CPU MICROCODE
   # ===========================================================================
-
   # See if hardware-configuration.nix add it
   # hardware.cpu.intel.updateMicrocode = true;
-
-  # No special Wayland workarounds needed for Intel
-  # (no WLR_NO_HARDWARE_CURSORS like with NVIDIA)
 }

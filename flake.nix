@@ -4,23 +4,27 @@
   # ===========================================================================
   # BINARY CACHES
   # ===========================================================================
-  # This will add additional third-party caches.
+  # This will add additional third-party caches
   # WARN: This could be a security concern, because:
-  #  1) We should trust added cache (by trusting cache's public key).
-  #  2) Current user should be a trusted user to utilize them.
+  #  1) We should trust added cache (by trusting cache's public key)
+  #  2) Current user should be a trusted user to utilize them
   # NOTE: Flake method changes caches only for evaluation of flake (there's
-  # also system-wide and command line variants).
+  # also system-wide and command line variants)
   nixConfig = {
-    # Consider to use close-located mirror instead of official
+    # NOTE: Consider to use close-located mirror instead of official
     # `extra-` for adding substituters to default ones, not replacing them
     extra-substituters = [
-      "https://nix-community.cachix.org"
+      # "https://nix-community.cachix.org"
       # "https://nix-gaming.cachix.org"
+      # "https://install.determinate.systems"
+      # "https://nixpkgs-wayland.cachix.org"
     ];
 
     extra-trusted-public-keys = [
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      # "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       # "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
+      # "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
+      # "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM="
     ];
   };
 
@@ -31,7 +35,7 @@
     # -------------------------------------------------------------------------
     # Core: Nixpkgs
     # -------------------------------------------------------------------------
-    # 24.11 stable as default, change to unstable in the future maybe
+    # NOTE: 24.11 stable as default, change to unstable in the future maybe
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
@@ -63,7 +67,7 @@
       url = "github:Echinoidea/Aporetic-Nerd-Font";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
+    #
     # OPTIONAL: Add more inputs as needed
     # Examples:
     # - stylix for system-wide theming
@@ -81,13 +85,13 @@
       # -----------------------------------------------------------------------
       # Package Sets
       # -----------------------------------------------------------------------
+      # NOTE: Probably don't need this one `nixosSystem` produces pkgs by itself
       # pkgs = import nixpkgs {
       #   inherit system;
       #   config = {
       #     allowUnfree = true;  # Allow proprietary packages (NVIDIA drivers, etc.)
       #   };
       # };
-
       pkgs-unstable = import nixpkgs-unstable {
         inherit system;
         config = {
@@ -115,10 +119,10 @@
           # Trusted Users
           # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           # Give the users in this list the right to specify additional substituters via
-          # `nixConfig.substituters` in `flake.nix`.
+          # `nixConfig.substituters` in `flake.nix`
           {
             nix.settings.trusted-users = [ "${username}" ];
-          };
+          }
 
           # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           # Shared Configuration
@@ -153,8 +157,8 @@
               # User configurations
               users.${username} = import ./home.nix;
             };
-          };
-
+          }
+          #
           # STANDALONE HOME MANAGER (OPTIONAL)
           # ==================================
           # Use this if you want to manage home-manager separately from NixOS
@@ -174,8 +178,6 @@
           # };
         ] ++ modules;
       };
-
-      # stateVersion = "24.11"; # DON'T CHANGE after installation
 
     # =========================================================================
     # SYSTEM CONFIGURATIONS
@@ -198,7 +200,6 @@
       };
     };
 }
-
 # =============================================================================
 # USAGE GUIDE
 # =============================================================================
@@ -251,21 +252,4 @@
 #         ├── default.nix
 #         ├── intel-amd.nix
 #         └── hardware-configuration.nix
-#
-# =============================================================================
-# FLAKES: ADVANTAGES & GOTCHAS
-# =============================================================================
-#
-# ADVANTAGES:
-# 1. Reproducibility: Exact versions locked in flake.lock
-# 2. Composability: Easy to import others' configurations
-# 3. Speed: Flakes are evaluated more efficiently
-# 4. Standards: Everyone's flakes have similar structure
-# 5. No channels: Dependencies explicit, not global system state
-#
-# GOTCHAS:
-# 1. Still "experimental" (but widely used and stable in practice)
-# 2. Requires enabling: nix.settings.experimental-features = [ "nix-command" "flakes" ];
-# 3. Different commands: nixos-rebuild switch --flake instead of just nixos-rebuild switch
-# 4. Git requirement: Flakes work best in git repos (uses git to track files)
 
