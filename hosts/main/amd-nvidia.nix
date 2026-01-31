@@ -115,9 +115,16 @@
   # WAYLAND (Sway) WORKAROUNDS
   # ===========================================================================
   #
-  # NVIDIA specific env variables
+  # NVIDIA specific env variables:
+  #   - LIBVA_DRIVER_NAME=nvidia: Tells VA-API (video acceleration API) to use NVIDIA's driver
+  #   - __GLX_VENDOR_LIBRARY_NAME=nvidia: Tells OpenGL to use NVIDIA's libraries
+  #   - NVD_BACKEND=direct: Uses NVIDIA's direct backend for video decoding
+  #   - GBM_BACKEND=nvidia-drm: Tells GBM (Generic Buffer Management) to use NVIDIA's DRM backend
   programs.sway.extraSessionCommands = ''
     export WLR_NO_HARDWARE_CURSORS=1
-    export __GLX_VENDOR_LIBRARY_NAME=mesa
+    export __GLX_VENDOR_LIBRARY_NAME=nvidia
+    export LIBVA_DRIVER_NAME=nvidia
+    export NVD_BACKEND=direct
+    export GBM_BACKEND=nvidia-drm
   '';
 }

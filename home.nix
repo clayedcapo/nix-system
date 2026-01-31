@@ -1,68 +1,238 @@
-# home.nix (Flakes version)
-#
-# DIFFERENCES FROM NON-FLAKE VERSION:
-# ===================================
-# 1. Can use specialArgs passed from flake.nix (pkgs-unstable, username, etc.)
-# 2. No need to set home.username/homeDirectory if using variables
-# 3. Can easily use packages from different channels
-
+# =============================================================================
+# HOME MANAGER CONFIGURATION
+# =============================================================================
+# User-specific configuration managed by Home Manager
+# This file is imported by flake.nix as a NixOS module
 { config, pkgs, lib, inputs, pkgs-unstable, username, ... }:
 # ^
 # | Arguments passed from flake.nix via extraSpecialArgs:
-# | - inputs: All flake inputs
-# | - pkgs-unstable: Unstable package set
+# | - config: Home Manager configuration (for self-references)
+# | - pkgs: The nixpkgs package set (stable)
+# | - lib: NixOS/Home Manager library functions
+# | - inputs: All flake inputs (for custom packages)
+# | - pkgs-unstable: Unstable package set (for latest versions)
 # | - username: Your username variable
-
 {
-  # Home Manager needs to know about your user
-  # Using the username variable from flake.nix
+  # ===========================================================================
+  # USER SETTINGS
+  # ===========================================================================
   home.username = username;
   home.homeDirectory = "/home/${username}";
 
-  # Packages installed only for this user
+  # ---------------------------------------------------------------------------
+  # Session Variables
+  # ---------------------------------------------------------------------------
+  home.sessionVariables = {
+    BROWSER = "vivaldi";
+    DELTA_PAGER = "less -R";  # Enable scrolling in `git diff` with delta
+  };
+
+  # ===========================================================================
+  # PACKAGES
+  # ===========================================================================
   home.packages = with pkgs; [
-    # Base
+    # -------------------------------------------------------------------------
+    # Base Tools
+    # -------------------------------------------------------------------------
     alacritty
     tmux
-    pkgs-unstable.helix
+    jujutsu
+    gnupg
 
-    ripgrep
-    fd
-    bat
-    eza
-    zoxide
-    fzf
-    jq
+    # -------------------------------------------------------------------------
+    # Nix Ecosystem Tools
+    # -------------------------------------------------------------------------
+    nix-output-monitor  # Prettier build output with dependency graph (nom)
+    hydra-check         # Check Hydra CI for package build status
+    nix-index           # Locate packages providing a file (nix-locate)
+    nix-init            # Generate Nix derivations from URLs
+    nix-melt            # Ranger-like flake.lock viewer
+    nix-tree            # TUI to visualize derivation dependency graphs
 
-    # Languages
-    # python3
-    # rustup
+    # -------------------------------------------------------------------------
+    # Development Tools
+    # -------------------------------------------------------------------------
+    # NOTE: Language toolchains should be in per-project dev shells, not here
+    # See dev-environments-guide.md for the recommended workflow
+    gitleaks  # Scan git repos for secrets
+    k6        # Load testing tool
+    devbox    # Simplified dev environments (alternative to raw Nix shells)
 
-    # GUI apps
+    # -------------------------------------------------------------------------
+    # Database Clients
+    # -------------------------------------------------------------------------
+    sqlite
+    pgcli     # PostgreSQL CLI with auto-completion and syntax highlighting
+
+    # -------------------------------------------------------------------------
+    # GUI Applications
+    # -------------------------------------------------------------------------
+    vivaldi
     obsidian
     telegram-desktop
-    vlc
     zathura
+    zoom-us
+
+    # -------------------------------------------------------------------------
+    # Multimedia
+    # -------------------------------------------------------------------------
+    ffmpeg-full
+    vlc
+    imv          # Simple image viewer for Wayland
+
+    # -------------------------------------------------------------------------
+    # Miscellaneous
+    # -------------------------------------------------------------------------
+    astroterm  # Terminal planetarium
   ];
 
-  # ============================================================================
-  # SWAY CONFIGURATION
-  # ============================================================================
+  # ===========================================================================
+  # CLI TOOLS
+  # ===========================================================================
+  # ---------------------------------------------------------------------------
+  # eza - Modern ls replacement
+  # ---------------------------------------------------------------------------
+  programs.eza = {
+    enable = true;
+    enableZshIntegration = true;   # Creates `ls` alias
+    enableBashIntegration = true;
+    git = true;       # Show git status for files
+    colors = "always";
+    icons = "auto";
+  };
 
-  wayland.windowManager.sway = {
+  # ---------------------------------------------------------------------------
+  # bat - Cat with syntax highlighting
+  # ---------------------------------------------------------------------------
+  # TODO: Add shell integrations from https://github.com/sharkdp/bat#integration-with-other-tools
+  # Examples: man pages colorization, --help colorization, git diff integration
+  programs.bat = {
     enable = true;
     config = {
-      modifier = "Mod4";
+      theme = "ansi";
+      pager = "less -KFR";  # K=quit on Ctrl+C, F=quit if fits screen, R=raw control chars
+    };
+  };
+
+  # ---------------------------------------------------------------------------
+  # fzf - Fuzzy finder
+  # ---------------------------------------------------------------------------
+  # Keybindings enabled by shell integration:
+  #   - Ctrl+T: Insert file paths
+  #   - Ctrl+R: Search shell history
+  #   - Alt+C: cd into directories
+  #   - Tab: Enhanced completion for many commands
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = true;
+    enableBashIntegration = true;
+
+    defaultCommand = "fd --type f --color=always";
+    defaultOptions = [
+      "--style full"
+      "--preview='bat --color=always --style=numbers --line-range=:500 {}'"
+    ];
+
+    # Alt+C configuration (directory navigation)
+    changeDirWidgetCommand = "fd --type d --color=always";
+    changeDirWidgetOptions = [
+      "--style full"
+      "--preview 'tree -C {} | head -200'"
+    ];
+
+    # Ctrl+T configuration (file selection)
+    fileWidgetCommand = "fd --type f";
+    # fileWidgetOptions = [ ];
+
+    # Ctrl+R configuration (history search)
+    # historyWidgetOptions = [ ];
+  };
+
+  # ---------------------------------------------------------------------------
+  # tealdeer - Fast tldr client
+  # ---------------------------------------------------------------------------
+  programs.tealdeer = {
+    enable = true;
+    enableAutoUpdates = false;  # Manual updates with `tldr --update`
+    settings = {
+      display = {
+        compact = false;
+        pager = true;
+      };
+    };
+  };
+
+  # ---------------------------------------------------------------------------
+  # zoxide - Smarter cd command
+  # ---------------------------------------------------------------------------
+  # Commands: `z` (jump), `zi` (interactive with fzf)
+  programs.zoxide = {
+    enable = true;
+    enableZshIntegration = true;
+    enableBashIntegration = true;
+    # options = [ ];  # Additional options for `zoxide init`
+  };
+
+  # ---------------------------------------------------------------------------
+  # fastfetch - System information tool
+  # ---------------------------------------------------------------------------
+  programs.fastfetch = {
+    enable = true;
+    settings = {
+      logo = {
+        source = "nixos_small";
+      };
+    };
+  };
+
+  # TODO: Consider atuin for shell history (https://github.com/atuinsh/atuin)
+  # programs.atuin = { };
+  #
+  # ===========================================================================
+  # SHELL CONFIGURATION
+  # ===========================================================================
+  # TODO: Configure zsh with:
+  #   - Prompt theme (starship or powerlevel10k)
+  #   - Plugins (syntax highlighting, autosuggestions)
+  #   - Custom aliases and functions
+  #   - History configuration
+  #
+  # programs.zsh = {
+  #   enable = true;
+  #   autosuggestion.enable = true;
+  #   syntaxHighlighting.enable = true;
+  # };
+  #
+  # ===========================================================================
+  # SWAY (Wayland Compositor)
+  # ===========================================================================
+  # System-level Sway settings are in configuration.nix (programs.sway)
+  # This configures user-specific behavior, keybindings, and appearance
+  wayland.windowManager.sway = {
+    enable = true;
+
+    config = {
+      # -----------------------------------------------------------------------
+      # General Settings
+      # -----------------------------------------------------------------------
+      modifier = "Mod4";  # Super/Windows key
       terminal = "alacritty";
       menu = "tofi-drun | xargs swaymsg exec --";
 
+      # -----------------------------------------------------------------------
+      # Startup Applications
+      # -----------------------------------------------------------------------
       startup = [
-        { command = "mako"; }
-        { command = "waybar"; }
+        { command = "mako"; }    # Notification daemon
+        { command = "waybar"; }  # Status bar
+        # wob: Wayland Overlay Bar for volume/brightness feedback
         { command = "mkfifo $SWAYSOCK.wob && tail -f $SWAYSOCK.wob | wob"; }
       ];
 
-      # Idle configuration with swaylock and display power management
+      # -----------------------------------------------------------------------
+      # Idle and Lock Configuration
+      # -----------------------------------------------------------------------
+      # 5 min: lock screen, 10 min: turn off display
       idle = [
         {
           timeout = 300;
@@ -75,86 +245,94 @@
         }
       ];
 
-      # Key bindings
+      # -----------------------------------------------------------------------
+      # Key Bindings
+      # -----------------------------------------------------------------------
       keybindings = let
-        modifier = config.wayland.windowManager.sway.config.modifier;
+        mod = config.wayland.windowManager.sway.config.modifier;
       in {
-        # Basic bindings
-        "${modifier}+Return" = "exec ${pkgs.alacritty}/bin/alacritty";
-        "${modifier}+Shift+q" = "kill";
-        "${modifier}+d" = "exec ${pkgs.tofi}/bin/tofi-drun | xargs swaymsg exec --";
-        "${modifier}+Shift+c" = "reload";
-        "${modifier}+Shift+e" = "exec swaynag -t warning -m 'Exit sway?' -b 'Yes' 'swaymsg exit'";
+        # Basic
+        "${mod}+Return" = "exec ${pkgs.alacritty}/bin/alacritty";
+        "${mod}+Shift+q" = "kill";
+        "${mod}+d" = "exec ${pkgs.tofi}/bin/tofi-drun | xargs swaymsg exec --";
+        "${mod}+Shift+c" = "reload";
+        "${mod}+Shift+e" = "exec swaynag -t warning -m 'Exit sway?' -b 'Yes' 'swaymsg exit'";
 
         # Lock screen
-        "${modifier}+l" = "exec ${pkgs.swaylock}/bin/swaylock -f";
+        "${mod}+l" = "exec ${pkgs.swaylock}/bin/swaylock -f";
 
-        # Screenshots
+        # Screenshots (to clipboard)
         "Print" = "exec ${pkgs.grim}/bin/grim -g \"$(${pkgs.slurp}/bin/slurp)\" - | ${pkgs.wl-clipboard}/bin/wl-copy";
         "Shift+Print" = "exec ${pkgs.grim}/bin/grim - | ${pkgs.wl-clipboard}/bin/wl-copy";
 
-        # Focus
-        "${modifier}+Left" = "focus left";
-        "${modifier}+Down" = "focus down";
-        "${modifier}+Up" = "focus up";
-        "${modifier}+Right" = "focus right";
+        # Focus navigation
+        "${mod}+Left" = "focus left";
+        "${mod}+Down" = "focus down";
+        "${mod}+Up" = "focus up";
+        "${mod}+Right" = "focus right";
 
         # Move windows
-        "${modifier}+Shift+Left" = "move left";
-        "${modifier}+Shift+Down" = "move down";
-        "${modifier}+Shift+Up" = "move up";
-        "${modifier}+Shift+Right" = "move right";
+        "${mod}+Shift+Left" = "move left";
+        "${mod}+Shift+Down" = "move down";
+        "${mod}+Shift+Up" = "move up";
+        "${mod}+Shift+Right" = "move right";
 
         # Workspaces
-        "${modifier}+1" = "workspace number 1";
-        "${modifier}+2" = "workspace number 2";
-        "${modifier}+3" = "workspace number 3";
-        "${modifier}+4" = "workspace number 4";
-        "${modifier}+5" = "workspace number 5";
-        "${modifier}+6" = "workspace number 6";
-        "${modifier}+7" = "workspace number 7";
-        "${modifier}+8" = "workspace number 8";
-        "${modifier}+9" = "workspace number 9";
-        "${modifier}+0" = "workspace number 10";
+        "${mod}+1" = "workspace number 1";
+        "${mod}+2" = "workspace number 2";
+        "${mod}+3" = "workspace number 3";
+        "${mod}+4" = "workspace number 4";
+        "${mod}+5" = "workspace number 5";
+        "${mod}+6" = "workspace number 6";
+        "${mod}+7" = "workspace number 7";
+        "${mod}+8" = "workspace number 8";
+        "${mod}+9" = "workspace number 9";
+        "${mod}+0" = "workspace number 10";
 
-        # Move to workspace
-        "${modifier}+Shift+1" = "move container to workspace number 1";
-        "${modifier}+Shift+2" = "move container to workspace number 2";
-        "${modifier}+Shift+3" = "move container to workspace number 3";
-        "${modifier}+Shift+4" = "move container to workspace number 4";
-        "${modifier}+Shift+5" = "move container to workspace number 5";
-        "${modifier}+Shift+6" = "move container to workspace number 6";
-        "${modifier}+Shift+7" = "move container to workspace number 7";
-        "${modifier}+Shift+8" = "move container to workspace number 8";
-        "${modifier}+Shift+9" = "move container to workspace number 9";
-        "${modifier}+Shift+0" = "move container to workspace number 10";
+        # Move container to workspace
+        "${mod}+Shift+1" = "move container to workspace number 1";
+        "${mod}+Shift+2" = "move container to workspace number 2";
+        "${mod}+Shift+3" = "move container to workspace number 3";
+        "${mod}+Shift+4" = "move container to workspace number 4";
+        "${mod}+Shift+5" = "move container to workspace number 5";
+        "${mod}+Shift+6" = "move container to workspace number 6";
+        "${mod}+Shift+7" = "move container to workspace number 7";
+        "${mod}+Shift+8" = "move container to workspace number 8";
+        "${mod}+Shift+9" = "move container to workspace number 9";
+        "${mod}+Shift+0" = "move container to workspace number 10";
 
         # Layout
-        "${modifier}+b" = "splith";
-        "${modifier}+v" = "splitv";
-        "${modifier}+s" = "layout stacking";
-        "${modifier}+w" = "layout tabbed";
-        "${modifier}+e" = "layout toggle split";
-        "${modifier}+f" = "fullscreen";
-        "${modifier}+Shift+space" = "floating toggle";
-        "${modifier}+space" = "focus mode_toggle";
+        "${mod}+b" = "splith";
+        "${mod}+v" = "splitv";
+        "${mod}+s" = "layout stacking";
+        "${mod}+w" = "layout tabbed";
+        "${mod}+e" = "layout toggle split";
+        "${mod}+f" = "fullscreen";
+        "${mod}+Shift+space" = "floating toggle";
+        "${mod}+space" = "focus mode_toggle";
 
-        # Audio controls with wob overlay
+        # Audio (with wob overlay feedback)
         "XF86AudioRaiseVolume" = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+ && wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print $2*100}' > $SWAYSOCK.wob";
         "XF86AudioLowerVolume" = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%- && wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print $2*100}' > $SWAYSOCK.wob";
         "XF86AudioMute" = "exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
 
-        # Brightness controls with wob overlay
+        # Brightness (with wob overlay feedback)
         "XF86MonBrightnessUp" = "exec light -A 5 && light -G | cut -d'.' -f1 > $SWAYSOCK.wob";
         "XF86MonBrightnessDown" = "exec light -U 5 && light -G | cut -d'.' -f1 > $SWAYSOCK.wob";
       };
 
+      # -----------------------------------------------------------------------
+      # Output Configuration
+      # -----------------------------------------------------------------------
       output = {
         "*" = {
           bg = "#000000 solid_color";
         };
       };
 
+      # -----------------------------------------------------------------------
+      # Input Configuration
+      # -----------------------------------------------------------------------
       input = {
         "*" = {
           xkb_layout = "us";
@@ -163,12 +341,16 @@
         "type:touchpad" = {
           tap = "enabled";
           natural_scroll = "enabled";
-          dwt = "enabled";
+          dwt = "enabled";  # Disable while typing
         };
       };
 
+      # -----------------------------------------------------------------------
+      # Window Rules
+      # -----------------------------------------------------------------------
       window.commands = [
         {
+          # Prevent screen from going idle when any app is fullscreen
           criteria = { app_id = "^.*"; };
           command = "inhibit_idle fullscreen";
         }
@@ -176,16 +358,16 @@
     };
 
     extraConfig = ''
-      # Add any additional sway config here
+      # Additional raw sway config can go here
     '';
   };
 
-  # ============================================================================
-  # WAYBAR CONFIGURATION
-  # ============================================================================
-
+  # ===========================================================================
+  # WAYBAR (Status Bar)
+  # ===========================================================================
   programs.waybar = {
     enable = true;
+
     settings = {
       mainBar = {
         layer = "top";
@@ -274,6 +456,7 @@
       };
     };
 
+    # Catppuccin-inspired styling
     style = ''
       * {
         border: none;
@@ -343,19 +526,15 @@
     '';
   };
 
-  # ============================================================================
-  # ALACRITTY CONFIGURATION
-  # ============================================================================
-
+  # ===========================================================================
+  # ALACRITTY (Terminal Emulator)
+  # ===========================================================================
   programs.alacritty = {
     enable = true;
     settings = {
       window = {
         opacity = 0.95;
-        padding = {
-          x = 10;
-          y = 10;
-        };
+        padding = { x = 10; y = 10; };
       };
 
       font = {
@@ -375,10 +554,28 @@
     };
   };
 
-  # ============================================================================
-  # MAKO (Notification Daemon)
-  # ============================================================================
-
+  # ===========================================================================
+  # HELIX (Text Editor)
+  # ===========================================================================
+  # TODO: Configure Helix with:
+  #   - Theme (catppuccin or kanso)
+  #   - LSP configurations
+  #   - Custom keybindings
+  #
+  # programs.helix = {
+  #   enable = true;
+  #   settings = {
+  #     theme = "catppuccin_mocha";
+  #     editor = {
+  #       line-number = "relative";
+  #       cursor-shape.insert = "bar";
+  #     };
+  #   };
+  # };
+  #
+  # ===========================================================================
+  # NOTIFICATIONS (Mako)
+  # ===========================================================================
   services.mako = {
     enable = true;
     backgroundColor = "#1e1e2e";
@@ -386,7 +583,7 @@
     borderColor = "#89b4fa";
     borderRadius = 5;
     borderSize = 2;
-    defaultTimeout = 5000;
+    defaultTimeout = 5000;  # 5 seconds
     width = 300;
     height = 100;
     margin = "10";
@@ -394,10 +591,9 @@
     font = "JetBrainsMono Nerd Font 10";
   };
 
-  # ============================================================================
-  # SWAYLOCK
-  # ============================================================================
-
+  # ===========================================================================
+  # SWAYLOCK (Screen Locker)
+  # ===========================================================================
   programs.swaylock = {
     enable = true;
     settings = {
@@ -410,82 +606,111 @@
     };
   };
 
-  # ============================================================================
+  # ===========================================================================
   # GIT
-  # ============================================================================
-
+  # ===========================================================================
+  # TODO: Add delta for better diffs, aliases, signing
   programs.git = {
     enable = true;
     userName = "Ilya Sergeev";
     userEmail = "wesunnn2@gmail.com";
+
+    # TODO: Additional useful git config
+    # delta.enable = true;  # Better diff viewer
+    # extraConfig = {
+    #   init.defaultBranch = "main";
+    #   pull.rebase = true;
+    #   push.autoSetupRemote = true;
+    # };
   };
 
-  # ============================================================================
-  # ADDITIONAL PROGRAMS WITH HOME MANAGER
-  # ============================================================================
-
-  # EXAMPLE: Use unstable version of a program
-  # programs.neovim = {
+  # ===========================================================================
+  # YAZI (File Manager)
+  # ===========================================================================
+  # TODO: Configure Yazi file manager
+  # programs.yazi = {
   #   enable = true;
-  #   package = pkgs-unstable.neovim;  # Use unstable neovim
+  #   enableZshIntegration = true;  # Shell wrapper for cd on exit
   # };
+  #
+  # ===========================================================================
+  # GTK THEMING
+  # ===========================================================================
+  # GTK application appearance settings
+  gtk = {
+    enable = true;
+    font = {
+      name = "AporeticSerifMonoNerdFont";
+      package = inputs.aporetic-nerd-font.packages.${pkgs.system}.default;
+      size = 11;
+    };
 
-  # EXAMPLE: Firefox with specific settings
-  # programs.firefox = {
-  #   enable = true;
-  #   package = pkgs-unstable.firefox;  # Latest Firefox
-  #   profiles.default = {
-  #     settings = {
-  #       "browser.startup.homepage" = "https://nixos.org";
-  #     };
-  #   };
-  # };
+    # NOTE: gtk.colorScheme is deprecated in newer Home Manager versions
+    # Use gtk3/gtk4 extraConfig or dconf settings instead
+    gtk3.extraConfig = {
+      gtk-application-prefer-dark-theme = true;
+    };
+    gtk4.extraConfig = {
+      gtk-application-prefer-dark-theme = true;
+    };
+  };
 
-  # Let Home Manager manage itself
+  # ===========================================================================
+  # HOME MANAGER
+  # ===========================================================================
+  # Let Home Manager manage itself (for standalone usage)
   programs.home-manager.enable = true;
 
-  # Home Manager version
+  # ===========================================================================
+  # STATE VERSION
+  # ===========================================================================
+  # DON'T CHANGE after initial setup
+  # This ensures Home Manager compatibility across upgrades
   home.stateVersion = "24.11";
 }
-
+# =============================================================================
+# TIPS & TRICKS
+# =============================================================================
+#
 # MIXING STABLE AND UNSTABLE PACKAGES
-# ====================================
+# -----------------------------------
 # With flakes, you can easily mix packages from different channels:
 #
-# home.packages = with pkgs; [
-#   # Stable packages (24.11)
-#   firefox
-#   thunderbird
-#
-#   # Unstable packages (latest)
-#   pkgs-unstable.discord
-#   pkgs-unstable.vscode
-#   pkgs-unstable.neovim
-# ];
+#   home.packages = with pkgs; [
+#     firefox              # From stable (24.11)
+#     pkgs-unstable.neovim # From unstable (latest)
+#   ];
 #
 # Or in program configs:
-# programs.alacritty = {
-#   enable = true;
-#   package = pkgs-unstable.alacritty;  # Use latest alacritty
-# };
-
+#
+#   programs.alacritty = {
+#     enable = true;
+#     package = pkgs-unstable.alacritty;  # Use latest version
+#   };
+#
 # ACCESSING FLAKE INPUTS
-# =======================
+# ----------------------
 # You can access other flake inputs if needed:
 #
-# Example: Using NUR (Nix User Repository) if added to flake.nix
-# home.packages = [
-#   inputs.nur.repos.some-user.some-package
-# ];
-
-# HOME MANAGER AS STANDALONE
-# ===========================
+#   home.packages = [
+#     inputs.nur.repos.some-user.some-package
+#   ];
+#
+# PROGRAMS VS PACKAGES
+# --------------------
+# - programs.*: Installs AND configures (preferred when available)
+# - home.packages: Just installs (use for apps without HM modules)
+#
+# Check available modules: https://home-manager-options.extranix.com/
+#
+# STANDALONE HOME MANAGER
+# -----------------------
 # If you use standalone Home Manager (not as NixOS module):
 #
-# Build with:
 #   home-manager switch --flake .#yourusername
 #
 # The flake.nix would have:
+#
 #   homeConfigurations.yourusername = home-manager.lib.homeManagerConfiguration {
 #     inherit pkgs;
 #     modules = [ ./home.nix ];

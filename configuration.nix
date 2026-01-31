@@ -52,15 +52,6 @@
     efi.canTouchEfiVariables = true;
   };
 
-  # TODO: Delete after disko/hardware configuration
-  # Kernel parameters for LUKS
-  # boot.initrd.luks.devices = {
-  #   cryptroot = {
-  #     device = "/dev/disk/by-uuid/XXXX";  # Will be auto-filled by hardware-configuration.nix
-  #     bypassWorkqueues = true;
-  #   };
-  # };
-  #
   # Allows to mount any removable disks with supported filesystems.
   boot.supportedFilesystems = [ "btrfs" "ext4" "vfat" "ntfs" ];
 
@@ -191,12 +182,24 @@
       # kanshi
     ];
 
+    # Wayland specific env vars:
+    #   - NIXOS_OZONE_WL=1: Enable Wayland support for Ozone-based applications (Chrome, Electron apps)
+    #   - ELECTRON_OZONE_PLATFORM_HINT=auto: Tells Electron apps (VS Code, Discord, etc.) to automatically use Wayland
+    #   - XDG_CURRENT_DESKTOP=sway: Identifies your desktop environment as Sway
+    #   - XDG_SESSION_TYPE=wayland: Tells applications your session type is Wayland
+    #   - QT_QPA_PLATFORM=wayland: Tells Qt-based applications (KDE apps, many others) to use Wayland
+    #   - QT_WAYLAND_DISABLE_WINDOWDECORATION=1: Disables Qt's own window decorations on Wayland and lets Sway handle them
+    #   - SDL_VIDEODRIVER=wayland: Tells SDL (Simple DirectMedia Layer, used in games and multimedia apps) to use Wayland for video output
+    #   - GDK_BACKEND=wayland: Tells GTK applications (GNOME apps, Firefox, etc.) to use Wayland instead of X11
     extraSessionCommands = ''
+      export NIXOS_OZONE_WL=1
+      export ELECTRON_OZONE_PLATFORM_HINT=auto
       export XDG_CURRENT_DESKTOP=sway
       export XDG_SESSION_TYPE=wayland
       export QT_QPA_PLATFORM=wayland
       export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
       export SDL_VIDEODRIVER=wayland
+      export GDK_BACKEND=wayland
     '';
   };
 
@@ -239,7 +242,6 @@
   # ===========================================================================
   # Using username variable from flake.nix
   users.users.${username} = {
-    home = "/home/${username}";
     isNormalUser = true;
     extraGroups = [
       "wheel"
@@ -259,11 +261,13 @@
   environment.systemPackages = with pkgs; [
     # Basic utilities
     zsh
+    bash
     helix
     git
     gnumake # make build system
     just # command runner, substitutes make, simpler
     fastfetch
+    yazi
 
     # System tools
     pciutils # lspci
@@ -299,7 +303,12 @@
     fzf
     fd
     ripgrep
+    ast-grep # syntax-aware grep/sed, write code patterns to locate and modify code, based on AST
+    bat
+    eza
+    zoxide
     dust # du replacement
+    tokei # count lines of code
 
     # Archives
     zip
@@ -331,9 +340,9 @@
     hyperfine
 
     # Graphics info tools
-    # glxinfo
     vulkan-tools
-    nvtop
+    libva-utils # collection of utilities and examples to exercise VA-API
+    mesa-demos # collection of demos and test programs for OpenGL and Mesa
 
     # File transfer
     rsync
@@ -411,6 +420,13 @@
   # SECURITY
   # ===========================================================================
   security.polkit.enable = true;
+
+  # Daemon to ban hosts that cause multiple authentication errors with logs lookup
+  services.fail2ban = {
+    enable = true;
+    maxretry = 5;
+    bantime = "1h";
+  };
 
   # TODO: Security: Consider using keyring
   #

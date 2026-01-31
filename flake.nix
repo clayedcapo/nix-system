@@ -155,7 +155,7 @@
               };
 
               # User configurations
-              users.${username} = import ./home.nix;
+              users.${username} = ./home.nix;
             };
           }
           #
