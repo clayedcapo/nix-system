@@ -183,6 +183,13 @@
     # SYSTEM CONFIGURATIONS
     # =========================================================================
     in {
+      # These allow disko to run without evaluating the full nixosConfiguration
+      # Usage: disko --flake .#main or disko --flake .#secondary
+      diskoConfigurations = {
+        main = import ./disko.nix { hostname = "main"; };
+        secondary = import ./disko.nix { hostname = "secondary"; };
+      };
+
       nixosConfigurations = {
 
         # Main laptop: AMD CPU + NVIDIA GPU (16GB RAM)
