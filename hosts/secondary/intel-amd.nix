@@ -2,6 +2,14 @@
 # GPU CONFIGURATION: Intel (integrated) + AMD (discrete)
 # =============================================================================
 # Intel iGPU as primary display adapter
+#
+# This is a simpler setup than main host (AMD+NVIDIA):
+#   - No PRIME offload needed (Intel handles most tasks)
+#   - AMD GPU available for compute/gaming if needed
+#   - Lower power consumption than discrete-only setup
+#
+# Unlike NVIDIA, AMD GPUs work well with open-source drivers (amdgpu)
+# and don't require special Wayland workarounds.
 { config, pkgs, ... }:
 {
   # ===========================================================================
@@ -53,6 +61,6 @@
   # ===========================================================================
   # CPU MICROCODE
   # ===========================================================================
-  # See if hardware-configuration.nix add it
+  # TODO: See if hardware-configuration.nix add it
   # hardware.cpu.intel.updateMicrocode = true;
 }

@@ -2,7 +2,7 @@
 # SHARED SYSTEM CONFIGURATION
 # =============================================================================
 # This file contains configuration shared between all hosts
-# Host-specific settings are in ./hosts/<hostname>/
+# Host-specific shared settings are in ./hosts/<hostname>/
 { config, pkgs, lib, inputs, pkgs-unstable, username, hostname, ... }:
 # ^
 # | These are the arguments passed to this module:
@@ -14,7 +14,7 @@
 # | - username: Your username (from specialArgs)
 # | - hostname: Your hostname (from specialArgs)
 {
-  # Here should be specified all additional modules that are shared among all systems
+  # NOTE: Here should be specified all additional modules that are shared among all hosts
   # imports = [ ];
   #
   # ===========================================================================
@@ -23,7 +23,7 @@
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];
 
-    # Optimize storage with auto-optimization
+    # Automatically detect files in the store that have identical contents, and replaces them with hard links to a single copy
     auto-optimise-store = true;
   };
 
@@ -47,8 +47,10 @@
   boot.loader = {
     systemd-boot = {
       enable = true;
+      # i.e. generations limit
       configurationLimit = 10;
     };
+    # Whether the installation process is allowed to modify EFI boot variables
     efi.canTouchEfiVariables = true;
   };
 
@@ -58,16 +60,66 @@
   # ===========================================================================
   # MEMORY & SWAP
   # ===========================================================================
-  # Zram swap. Memory usage is defined per host specifically.
+  # Memory hierarchy with zram-based swap and emergency disk swap
+  #
+  # ┌─────────────────────────────────────────────────────────────────────────┐
+  # │                      MEMORY USAGE HIERARCHY                             │
+  # └─────────────────────────────────────────────────────────────────────────┘
+  #
+  # ┌──────────────────────┐
+  # │   Physical RAM       │  ← Primary memory (fastest)
+  # │   (Host-specific)    │
+  # └──────────┬───────────┘
+  #            │ Paging out
+  #            ↓
+  # ┌──────────────────────┐
+  # │   Zram Swap          │  ← Compressed RAM (fast, priority: 5)
+  # │   (Configured below) │     Acts as "extra RAM" with compression
+  # └──────────┬───────────┘     Size: percentage of physical RAM
+  #            │ Only when zram is full
+  #            ↓
+  # ┌──────────────────────┐
+  # │   Disk Swap File     │  ← Emergency overflow (slow, priority: -1)
+  # │   /swapfile (4GB)    │     Rarely used, prevents OOM crashes
+  # └──────────────────────┘
+  #
+  # HOST-SPECIFIC CONFIGURATIONS:
+  # ┌────────────────────────────────────────────────────────────────────────┐
+  # │ Host: main (high RAM system)                                           │
+  # │   • zramSwap.memoryPercent = 40                                        │
+  # │     Example: 16GB RAM → 6.4GB zram (compressed to ~3GB actual usage)   │
+  # │   • vm.swappiness = 150 (aggressive swapping to fast zram)             │
+  # │   • /tmp on zram (14% of RAM) for fast temporary storage               │
+  # ├────────────────────────────────────────────────────────────────────────┤
+  # │ Host: secondary (low RAM system)                                       │
+  # │   • zramSwap.memoryPercent = 20                                        │
+  # │     Example: 8GB RAM → 1.6GB zram (compressed to ~800MB actual usage)  │
+  # │   • vm.swappiness = 100 (moderate swapping, conserves limited RAM)     │
+  # │   • No /tmp on zram (preserves RAM for applications)                   │
+  # └────────────────────────────────────────────────────────────────────────┘
+  #
+  # SWAP PRIORITY SYSTEM:
+  #   Higher priority = used first
+  #   • Zram: priority 5 (default) → Used when RAM is under high pressure
+  #   • Disk: priority -1 → Only used when zram is exhausted
+  #
+  # TUNING PARAMETERS (in hosts/*/default.nix):
+  #   • vm.swappiness: How aggressively to use swap (0-200)
+  #   • vm.page-cluster: Swap readahead (0 for zram = optimal)
+  #   • vm.vfs_cache_pressure: Cache vs swap preference
+  #   • vm.watermark_boost_factor and vm.watermark_scale_factor: Memory reclaim aggressiveness
+  #
+  # ===========================================================================
+
+  # Enable zram swap (size configured per-host in hosts/*/default.nix)
   zramSwap.enable = true;
 
-  # Small emergency swap. System will use zram by default (it has priority 5),
-  # and only when it's full it will fall back to swap file (priority -1)
+  # Emergency disk-based swap (only used when zram is full)
   swapDevices = [
     {
       device = "/swapfile";
-      size = 4096;
-      priority = -1;
+      size = 4096;       # 4GB - enough for emergency situations
+      priority = -1;     # Lower than zram (5), used as last resort
     }
   ];
 
@@ -80,8 +132,8 @@
 
     firewall = {
       enable = true;
-      # Allow SSH incoming requests
-      allowedTCPPorts = [ 22 ];
+      # Allow SSH and HTTPS incoming requests
+      allowedTCPPorts = [ 22 443 ];
       # allowedUDPPorts = [ ];
     };
 
@@ -93,13 +145,13 @@
   # LOCALIZATION
   # ===========================================================================
   time.timeZone = "Europe/Moscow";
-  i18n.defaultLocale = "en_US.UTF-8/UTF-8";
-  i18n.extraLocales = [ "ru_RU.UTF-8/UTF-8" ];
+  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.extraLocales = [ "ru_RU.UTF-8" ];
 
   # ===========================================================================
   # HARDWARE
   # ===========================================================================
-  # Hardware options are machine specific primarily. See in `./hosts`
+  # NOTE: Hardware options are machine specific primarily. See in `./hosts`
   #
   # -------------------------------------------------------------------------
   # Bluetooth
@@ -148,12 +200,12 @@
   # ===========================================================================
   # DESKTOP ENVIRONMENT (Sway/Wayland)
   # ===========================================================================
-  # Links `/libexec` from derivations to `/run/current-system/sw`
-  # `/libexec` contains helper internal executables, that are not meant for direct user execution,
-  # but binaries that depend on those helpers can look specifically for symlinks and will fail without them
-  environment.pathsToLink = [ "/libexec" ];
+  # Links paths from derivations to `/run/current-system/sw`
+  # - `/libexec`: Helper internal executables needed by some binaries
+  # - `/share/zsh`: Needed for zsh completions of system packages
+  environment.pathsToLink = [ "/libexec" "/share/zsh" ];
 
-  # NOTE: Despite a name, also maybe needed by wayland compositors, enable after testing if needed
+  # TODO: Despite a name, also maybe needed by wayland compositors, enable after testing if needed
   # services.xserver.enable = true;
 
   programs.sway = {
@@ -171,6 +223,7 @@
       swaybg
       wl-clipboard
       wl-clipboard-x11
+      wl-color-picker
       grim
       slurp
       tofi
@@ -227,16 +280,6 @@
   };
 
 
-  # TODO: Move it to home.nix
-  # Enable relatively new (hence not always supported) specification for a standardized way to
-  # launch user's preferred terminal.
-  # xdg.terminal-exec = {
-  #   enable = true;
-  #   settings = {
-  #     default = [ "alacritty" ];
-  #   };
-  # };
-
   # ===========================================================================
   # USERS
   # ===========================================================================
@@ -252,7 +295,6 @@
   };
 
   # Set default shell for all users
-  # TODO: configure zsh in home.nix
   users.defaultUserShell = pkgs.zsh;
 
   # ===========================================================================
@@ -331,6 +373,10 @@
     iperf # tool to measure IP bandwidth using UDP or TCP
     tcpdump # network sniffer
 
+    # Libraries
+    poppler # PDF rendering library
+    resvg # SVG rendering library
+
     # eBPF tools (https://ebpf.io/what-is-ebpf/)
     bpftrace
     bpftop
@@ -351,6 +397,10 @@
     # Security
     argon2 # password-hashing function
     openssl
+    gnupg
+
+    # Firmware
+    linux-firmware
 
     # Miscellaneous
     file # show file type
@@ -369,7 +419,10 @@
   # ===========================================================================
   # ENVIRONMENT
   # ===========================================================================
-  environment.variables.EDITOR = "helix";
+  environment.variables= {
+    EDITOR = "helix";
+    VISUAL = "helix";
+  };
 
   # Add specific shells to /etc/shells to be able to log with them
   environment.shells = with pkgs; [
@@ -381,6 +434,18 @@
   # NOTE: Probably not needed, but in case of using new modern terminal can help with different errors related to
   # inability to query terminfo on those terminals by programs like helix, tmux and etc.
   environment.enableAllTerminfo = true;
+
+  # ===========================================================================
+  # DOCUMENTATION
+  # ===========================================================================
+  documentation = {
+    enable = true;
+    man.enable = true;          # Man pages for system packages
+    man.generateCaches = true;  # Faster apropos/whatis lookups
+    nixos.enable = true;        # NixOS manual (configuration.nix options reference)
+    dev.enable = false;         # Development documentation
+    # doc.enable = true;        # HTML docs from packages (uses disk space)
+  };
 
   # ===========================================================================
   # FONTS
@@ -510,20 +575,5 @@
 #   home.packages = [
 #     pkgs.firefox
 #     pkgs-unstable.vscode
-#   ];
-#
-# MODULAR CONFIGURATION
-# ---------------------
-# As your config grows, you can split it into modules:
-#
-# ./modules/
-# ├── nvidia.nix           # NVIDIA-specific config
-# ├── gaming.nix           # Gaming setup
-# └── development.nix      # Dev tools
-#
-# Then import in configuration.nix:
-#   imports = [
-#     ./modules/nvidia.nix
-#     ./modules/gaming.nix
 #   ];
 

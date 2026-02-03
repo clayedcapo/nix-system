@@ -14,11 +14,11 @@
   # ===========================================================================
   # Disk encryption itself specified in disko config
   #
-  # SSD specific. Allows TRIM through encryptions layer, but
+  # SSD specific. Allows TRIM through encryptions layer at runtime, but
   # WARN: slightly reduces security (blocks could be identified in theory)
   boot.initrd.luks.devices.cryptroot = {
     allowDiscards = true;
-    # Optimization that allows (en,de)cryption to happen on a single core, so no performance hits with context switching
+    # Optimization that allows (en,de)cryption to happen on a single core, so no performance hits from context switching
     bypassWorkqueues = true;
   };
 
@@ -37,7 +37,7 @@
   # MEMORY MANAGEMENT
   # ===========================================================================
   #
-  # Those two kernel parameters fine tune swap space for zram
+  # Those kernel parameters fine tune swap space for zram
   boot.kernel.sysctl = {
     # Defines how eagerly to swap pages, should be high for zram setup in general
     "vm.swappiness" = 150;
@@ -84,7 +84,7 @@
   # KMSCON as the virtual console instead of gettys.
   # KMSCON is a kms/dri-based userspace virtual terminal implementation.
   # It supports a richer feature set than the standard linux console VT,
-  # including full unicode support, and when the video card supports drm should be much faster.
+  # including full unicode support, and when the video card supports DRM should be much faster.
   services.kmscon = {
     enable = true;
     fonts = [

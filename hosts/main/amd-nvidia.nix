@@ -61,7 +61,7 @@
         enableOffloadCmd = true;
       };
 
-      # Find with: lspci | grep -E "VGA|3D"
+      # NOTE: Find with: lspci | grep -E "VGA|3D"
       amdgpuBusId = "PCI:5:0:0";
       nvidiaBusId = "PCI:1:0:0";
     };
@@ -108,7 +108,7 @@
   # CPU MICROCODE
   # ===========================================================================
   #
-  # TODO: See if hardware-configuration.nix add it
+  # TODO: See if hardware-configuration.nix adds it
   # hardware.cpu.amd.updateMicrocode = true;
   #
   # ===========================================================================

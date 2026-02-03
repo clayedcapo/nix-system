@@ -2,7 +2,13 @@
 # HOST: secondary
 # =============================================================================
 # Secondary laptop: Intel CPU + AMD GPU (4GB RAM)
-# Hardware-specific configuration optimized for limited resources.
+# Hardware-specific configuration optimized for limited resources
+#
+# Key differences from main host:
+#   - Lower zram percentage (20% vs 40%) - conserves limited RAM
+#   - No /tmp on zram - uses disk to preserve memory
+#   - Higher watermark_scale_factor (2% vs 1.25%) - earlier memory reclaim
+#   - No SSD TRIM - HDD doesn't benefit from it
 { config, pkgs, ... }:
 {
   imports = [
@@ -13,12 +19,15 @@
   # TEMPORARY FILES
   # ===========================================================================
   # Use disk instead of RAM for /tmp (conserve memory on 4GB system)
+  # Unlike main host which uses zram for /tmp
   boot.tmp.cleanOnBoot = true;
 
   # ===========================================================================
   # DISK ENCRYPTION (LUKS)
   # ===========================================================================
   # Disk encryption itself specified in disko config
+  #
+  # NOTE: No allowDiscards here (HDD doesn't benefit from TRIM)
   #
   # Optimization that allows (en,de)cryption to happen on a single core, so
   # no performance hits with context switching
