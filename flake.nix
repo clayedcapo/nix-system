@@ -35,15 +35,15 @@
     # -------------------------------------------------------------------------
     # Core: Nixpkgs
     # -------------------------------------------------------------------------
-    # NOTE: 24.11 stable as default, change to unstable in the future maybe
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+    # NOTE: 25.11 stable as default, change to unstable in the future maybe
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     # -------------------------------------------------------------------------
     # Core: Home Manager
     # -------------------------------------------------------------------------
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.11";
+      url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

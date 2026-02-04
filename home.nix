@@ -23,8 +23,8 @@
   # Wallpaper
   home.file.".config/wallpaper/landscape.jpg".source = ./wallpaper/landscape.jpg;
 
-  home.shell.enableZshIntegration;
-  home.shell.enableBashIntegration;
+  home.shell.enableZshIntegration = true;
+  home.shell.enableBashIntegration = true;
 
   # ---------------------------------------------------------------------------
   # Session Variables
@@ -1489,6 +1489,25 @@
     '';
   };
 
+# =============================================================================
+# SWAYIDLE (Idle Management)
+# =============================================================================
+# Idle daemon for Wayland - handles screen locking and DPMS
+  services.swayidle = {
+    enable = true;
+    timeouts = [
+      {
+        timeout = 300;  # 5 minutes
+        command = "${pkgs.swaylock}/bin/swaylock -f";
+      }
+      {
+        timeout = 600;  # 10 minutes
+        command = "${pkgs.sway}/bin/swaymsg 'output * dpms off'";
+        resumeCommand = "${pkgs.sway}/bin/swaymsg 'output * dpms o n'";
+      }
+    ];
+  };
+
   # ===========================================================================
   # SWAYLOCK (Screen Locker)
   # ===========================================================================
@@ -1929,8 +1948,9 @@
         # Hash hostnames in known_hosts for privacy
         hashKnownHosts = true;
 
+        # TODO: No such option in 25.11, deal later when fine-graining ssh configuration
         # Connection timeout in seconds
-        connectTimeout = 10;
+        # connectTimeout = 10;
 
         # Don't forward SSH agent by default (security risk)
         forwardAgent = false;
@@ -1938,8 +1958,9 @@
         # X11 forwarding (disabled by default for security)
         forwardX11 = false;
 
+        # TODO: No such option in 25.11, deal later when fine-graining ssh configuration
         # Request TTY allocation (auto: only allocate when needed)
-        requestTTY = "auto";
+        # requestTTY = "auto";
       };
 
       "192.168.*" = {
@@ -2125,34 +2146,34 @@
       filetype = {
         rules = [
           # Media
-          { mime = "image/*"; fg = "#8ebeec"; };  # info/blue
-          { mime = "video/*"; fg = "#f54d27"; };  # orange
-          { mime = "audio/*"; fg = "#d9ba73"; };  # const/yellow
+          { mime = "image/*"; fg = "#8ebeec"; }  # info/blue
+          { mime = "video/*"; fg = "#f54d27"; }  # orange
+          { mime = "audio/*"; fg = "#d9ba73"; }  # const/yellow
 
           # Archives
-          { mime = "application/zip"; fg = "#ff7676"; };  # danger/red
-          { mime = "application/gzip"; fg = "#ff7676"; };
-          { mime = "application/x-tar"; fg = "#ff7676"; };
-          { mime = "application/x-bzip"; fg = "#ff7676"; };
-          { mime = "application/x-bzip2"; fg = "#ff7676"; };
-          { mime = "application/x-7z-compressed"; fg = "#ff7676"; };
-          { mime = "application/x-rar"; fg = "#ff7676"; };
+          { mime = "application/zip"; fg = "#ff7676"; }  # danger/red
+          { mime = "application/gzip"; fg = "#ff7676"; }
+          { mime = "application/x-tar"; fg = "#ff7676"; }
+          { mime = "application/x-bzip"; fg = "#ff7676"; }
+          { mime = "application/x-bzip2"; fg = "#ff7676"; }
+          { mime = "application/x-7z-compressed"; fg = "#ff7676"; }
+          { mime = "application/x-rar"; fg = "#ff7676"; }
 
           # Documents
-          { mime = "application/pdf"; fg = "#d9ba73"; };  # const
-          { mime = "text/*"; fg = "#8a9a7b"; };  # green
+          { mime = "application/pdf"; fg = "#d9ba73"; }  # const
+          { mime = "text/*"; fg = "#8a9a7b"; }  # green
 
           # Code
-          { name = "*.rs"; fg = "#f54d27"; };  # orange
-          { name = "*.go"; fg = "#8ebeec"; };  # info
-          { name = "*.py"; fg = "#d0bf41"; };  # yellow
-          { name = "*.js"; fg = "#d9ba73"; };  # const
-          { name = "*.ts"; fg = "#8ebeec"; };  # info
-          { name = "*.nix"; fg = "#8ebeec"; };  # info
+          { name = "*.rs"; fg = "#f54d27"; }  # orange
+          { name = "*.go"; fg = "#8ebeec"; }  # info
+          { name = "*.py"; fg = "#d0bf41"; }  # yellow
+          { name = "*.js"; fg = "#d9ba73"; }  # const
+          { name = "*.ts"; fg = "#8ebeec"; }  # info
+          { name = "*.nix"; fg = "#8ebeec"; }  # info
 
           # Special files
-          { name = "*"; is = "exec"; fg = "#8a9a7b"; };  # green
-          { name = "*"; is = "link"; fg = "#5abfb5"; };  # cyan
+          { name = "*"; is = "exec"; fg = "#8a9a7b"; }  # green
+          { name = "*"; is = "link"; fg = "#5abfb5"; }  # cyan
         ];
       };
     };
@@ -2257,7 +2278,6 @@
 
         "inode/directory" = "yazi.desktop";
       };
-    };
   };
 
   # Enable relatively new (hence not always supported) specification for a standardized way to
@@ -2280,7 +2300,7 @@
   # ===========================================================================
   # DON'T CHANGE after initial setup
   # This ensures Home Manager compatibility across upgrades
-  home.stateVersion = "24.11";
+  home.stateVersion = "25.11";
 }
 # =============================================================================
 # TIPS & TRICKS

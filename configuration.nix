@@ -146,7 +146,7 @@
   # ===========================================================================
   time.timeZone = "Europe/Moscow";
   i18n.defaultLocale = "en_US.UTF-8";
-  i18n.extraLocales = [ "ru_RU.UTF-8" ];
+  i18n.extraLocales = [ "ru_RU.UTF-8/UTF-8" ];
 
   # ===========================================================================
   # HARDWARE
@@ -296,6 +296,15 @@
 
   # Set default shell for all users
   users.defaultUserShell = pkgs.zsh;
+
+  # Enable zsh system-wide (required when setting it as user shell)
+  programs.zsh = {
+    enable = true;
+
+    enableCompletion = true;           # Enable tab completion
+    autosuggestion.enable = true;      # Fish-like autosuggestions from history
+    syntaxHighlighting.enable = true;  # Syntax highlighting for commands
+  };
 
   # ===========================================================================
   # PACKAGES
@@ -548,7 +557,7 @@
   # ===========================================================================
   # DON'T CHANGE after initial installation
   # This ensures system compatibility across upgrades
-  system.stateVersion = "24.11";
+  system.stateVersion = "25.11";
 }
 # =============================================================================
 # TIPS & TRICKS

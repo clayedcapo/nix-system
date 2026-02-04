@@ -32,13 +32,8 @@
     enable32Bit = true;
 
     extraPackages = with pkgs; [
-      vaapiIntel        # For older Intel GPUs
-      vaapiVdpau
-      amdvlk
-    ];
-
-    extraPackages32 = with pkgs; [
-      driversi686Linux.amdvlk
+      intel-media-driver        # For Broadwell arch and newer
+      libva-vdpau-driver
     ];
   };
 

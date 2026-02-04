@@ -87,13 +87,13 @@
     enable32Bit = true;
 
     extraPackages = with pkgs; [
-      amdvlk
       rocm-opencl-icd
     ];
 
-    extraPackages32 = with pkgs; [
-      driversi686Linux.amdvlk
-    ];
+    # NOTE: Probably depricated in 25.x
+    # extraPackages32 = with pkgs; [
+    #   driversi686Linux.amdvlk
+    # ];
   };
 
   # ===========================================================================
