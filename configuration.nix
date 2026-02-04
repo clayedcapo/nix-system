@@ -302,7 +302,7 @@
     enable = true;
 
     enableCompletion = true;           # Enable tab completion
-    autosuggestion.enable = true;      # Fish-like autosuggestions from history
+    autosuggestions.enable = true;      # Fish-like autosuggestions from history
     syntaxHighlighting.enable = true;  # Syntax highlighting for commands
   };
 

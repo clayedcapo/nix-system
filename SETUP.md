@@ -36,7 +36,6 @@ sudo nmtui
 export NIX_CONFIG="experimental-features = nix-command flakes"
 
 # Clone configuration
-nix-shell -p git
 git clone https://github.com/clayedcapo/nixos-system.git /tmp/nixos
 cd /tmp/nixos
 
