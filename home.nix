@@ -384,13 +384,13 @@
 
       # Quick edits
       alias zshrc='$EDITOR ~/.zshrc'
-      alias hx='helix'
+      alias helix='hx'  # hx is the actual binary name
 
       # -----------------------------------------------------------------------
       # Key Bindings
       # -----------------------------------------------------------------------
-      # Vi-style key bindings (default, but explicit)
-      bindkey -v
+      # Emacs-style key bindings (default, but explicit)
+      bindkey -e
 
       # Ctrl+U to delete from cursor to beginning of line (bash-style)
       bindkey '^U' backward-kill-line
@@ -695,7 +695,6 @@
       # -----------------------------------------------------------------------
       startup = [
         { command = "mako"; }    # Notification daemon
-        { command = "waybar"; }  # Status bar
         # wob: Wayland Overlay Bar for volume/brightness feedback
         { command = "rm -f $XDG_RUNTIME_DIR/wob.sock && mkfifo $XDG_RUNTIME_DIR/wob.sock && tail -f $XDG_RUNTIME_DIR/wob.sock | wob"; }
       ];
@@ -1488,7 +1487,7 @@
       {
         timeout = 600;  # 10 minutes
         command = "${pkgs.sway}/bin/swaymsg 'output * dpms off'";
-        resumeCommand = "${pkgs.sway}/bin/swaymsg 'output * dpms o n'";
+        resumeCommand = "${pkgs.sway}/bin/swaymsg 'output * dpms on'";
       }
     ];
   };
