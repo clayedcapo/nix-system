@@ -336,7 +336,7 @@
     iftop # network monitoring
     procs # modern ps
     lsof # tool to list open files
-    systat # provides `cifsiostat`, `iostat`, `mpstat`, `pidstat`, `sadf`, `sar`, `tapestat`
+    sysstat # provides `cifsiostat`, `iostat`, `mpstat`, `pidstat`, `sadf`, `sar`, `tapestat`
     sysbench # scriptable multi-threaded benchmark tool based on LuaJIT
     systemctl-tui
 
@@ -404,7 +404,7 @@
     croc # file transfer between computers securely and easily
 
     # Security
-    argon2 # password-hashing function
+    libargon2 # password-hashing function
     openssl
     gnupg
 
@@ -469,15 +469,11 @@
     packages = [
       inputs.aporetic-nerd-font.packages.${pkgs.system}.default
     ] ++ (with pkgs; [
-      (nerdfonts.override {
-        fonts = [
-          "JetBrainsMono"
-          "FiraCode"
-          "Iosevka"
-        ];
-      })
+      nerd-fonts.jetbrains-mono
+      nerd-fonts.fira-mono
+      nerd-fonts.iosevka
       noto-fonts
-      noto-fonts-emoji
+      noto-fonts-color-emoji
       font-awesome
     ]);
 

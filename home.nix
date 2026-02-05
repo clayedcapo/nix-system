@@ -271,7 +271,7 @@
           owner = "sindresorhus";
           repo = "pure";
           rev = "v1.23.0";
-          sha256 = "sha256-BmQO4xqd/3QnpLUitD2obVxL0UulpboT8jGNEh4ejfw=";
+          sha256 = "sha256-BmQO4xqd/3QnpLUitD2obVxL0UulpboT8jGNEh4ri8k=";
         };
         file = "pure.zsh";
       }
@@ -698,22 +698,6 @@
         { command = "waybar"; }  # Status bar
         # wob: Wayland Overlay Bar for volume/brightness feedback
         { command = "rm -f $XDG_RUNTIME_DIR/wob.sock && mkfifo $XDG_RUNTIME_DIR/wob.sock && tail -f $XDG_RUNTIME_DIR/wob.sock | wob"; }
-      ];
-
-      # -----------------------------------------------------------------------
-      # Idle and Lock Configuration
-      # -----------------------------------------------------------------------
-      # 5 min: lock screen, 10 min: turn off display
-      idle = [
-        {
-          timeout = 300;
-          command = "${pkgs.swaylock}/bin/swaylock -f";
-        }
-        {
-          timeout = 600;
-          command = "${pkgs.sway}/bin/swaymsg 'output * dpms off'";
-          resumeCommand = "${pkgs.sway}/bin/swaymsg 'output * dpms on'";
-        }
       ];
 
       # -----------------------------------------------------------------------
