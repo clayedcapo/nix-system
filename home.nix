@@ -882,6 +882,7 @@
 
       window = {
         border = 2;
+        titlebar = false;
 
         commands = [
           {
