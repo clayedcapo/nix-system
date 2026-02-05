@@ -165,7 +165,7 @@
   # Audio (PipeWire)
   # -------------------------------------------------------------------------
   # Conflicts with PipeWire
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
 
   # RealtimeKit system service, which hands out realtime scheduling priority to user processes on demand
   security.rtkit.enable = true;

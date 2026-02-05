@@ -281,7 +281,7 @@
     # Shell Options
     # ---------------------------------------------------------------------------
     # See: https://zsh.sourceforge.io/Doc/Release/Options.html
-    initExtra = ''
+    initContent = ''
       # -----------------------------------------------------------------------
       # Pure Prompt Configuration
       # -----------------------------------------------------------------------
@@ -389,7 +389,7 @@
       # -----------------------------------------------------------------------
       # Key Bindings
       # -----------------------------------------------------------------------
-      # Emacs-style key bindings (default, but explicit)
+      # Vi-style key bindings (default, but explicit)
       bindkey -v
 
       # Ctrl+U to delete from cursor to beginning of line (bash-style)
@@ -707,8 +707,8 @@
         mod = config.wayland.windowManager.sway.config.modifier;
       in {
         # Basic
-        "${mod}+Return" = "exec prime-run ${pkgs.alacritty}/bin/alacritty";
-        "${mod}+Control+Return" = "exec prime-run vivaldi";
+        "${mod}+Return" = "exec ${pkgs.alacritty}/bin/alacritty";
+        "${mod}+Control+Return" = "exec vivaldi";
         "${mod}+q" = "kill";
         "${mod}+d" = "exec ${pkgs.tofi}/bin/tofi-run | xargs swaymsg exec --";
         "${mod}+Control+d" = "exec ${pkgs.tofi}/bin/tofi-drun | xargs swaymsg exec --";
@@ -832,7 +832,8 @@
       # -----------------------------------------------------------------------
       output = {
         "*" = {
-          bg = "~/.config/wallpaper/landscape.jpg fill";
+          # TODO: This fails on system install, so figure out how to meitgate it later
+          # bg = "~/.config/wallpaper/landscape.jpg fill";
         };
       };
 
@@ -1812,7 +1813,7 @@
 
     # Pinentry program for passphrase prompts
     # Options: pinentry-curses (CLI), pinentry-gnome3 (GUI/Wayland), pinentry-qt (Qt)
-    pinentryPackage = pkgs.pinentry-gnome3;  # Works well with Wayland/Sway
+    pinentry.package = pkgs.pinentry-gnome3;  # Works well with Wayland/Sway
 
     # -------------------------------------------------------------------------
     # Cache Settings
