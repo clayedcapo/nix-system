@@ -831,8 +831,8 @@
       # -----------------------------------------------------------------------
       output = {
         "*" = {
-          # TODO: This fails on system install, so figure out how to meitgate it later
-          # bg = "~/.config/wallpaper/landscape.jpg fill";
+          # NOTE: Interpolation here allows to always correctly reference wallpaper, on initial build and then on rebuilds
+          bg = "${./wallpaper/landscape.jpg} fill";
         };
       };
 
