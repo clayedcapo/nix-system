@@ -49,6 +49,9 @@
       enable = true;
       # i.e. generations limit
       configurationLimit = 10;
+      # Whether to allow editing the kernel command line at boot
+      # WARN: If set to true, then it allows gaining root access by passing init=/bin/sh
+      editor = false;
     };
     # Whether the installation process is allowed to modify EFI boot variables
     efi.canTouchEfiVariables = true;
@@ -123,6 +126,9 @@
     }
   ];
 
+  # Write incompressible pages to this device (there's no gain from keeping them in RAM)
+  zramSwap.writebackDevice = "/swapfile";
+
   # ===========================================================================
   # NETWORKING
   # ===========================================================================
@@ -191,12 +197,12 @@
   # DBus interface for apps for power management
   services.upower.enable = true;
 
-  # TODO: See if hardware-configuration.nix enables it
-  # powerManagement = {
-  #   enable = true;
-  #   cpuFreqGovernor = "powersave";
-  # };
-  #
+  # Enables support for suspend-to-RAM and powersave features on laptops
+  powerManagement = {
+    enable = true;
+    cpuFreqGovernor = "performance";
+  };
+
   # ===========================================================================
   # DESKTOP ENVIRONMENT (Sway/Wayland)
   # ===========================================================================
@@ -274,9 +280,9 @@
     mime.enable = true;    # file associations - essential
     icons.enable = true;   # icon themes - needed for GUI apps
 
-    # Skip these for Sway:
-    # autostart.enable = true;  # Sway uses exec mechanism
-    # menus.enable = true;      # not used by tofi/wofi
+    # Disable those for Sway:
+    autostart.enable = false;  # Sway uses exec mechanism
+    menus.enable = false;      # not used by tofi/wofi
   };
 
 
@@ -408,14 +414,18 @@
     openssl
     gnupg
 
+    # NOTE: Not needed in general (hardware-configuration.nix handles firmware)
+    # But in case of missing some special firmware enable it
     # Firmware
-    linux-firmware
+    # linux-firmware
 
     # Miscellaneous
     file # show file type
     which
     tree
     tealdeer # fast tldr version
+    man-pages # Linux development manual pages
+    man-pages-posix # POSIX man-pages (0p, 1p, 3p)
 
     # EXAMPLE: Using unstable packages for specific tools
     # pkgs-unstable.neovim  # Get latest neovim from unstable

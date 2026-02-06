@@ -1482,11 +1482,11 @@
     enable = true;
     timeouts = [
       {
-        timeout = 300;  # 5 minutes
+        timeout = 600;  # 10 minutes
         command = "${pkgs.swaylock}/bin/swaylock -f";
       }
       {
-        timeout = 600;  # 10 minutes
+        timeout = 1800;  # 30 minutes
         command = "${pkgs.sway}/bin/swaymsg 'output * dpms off'";
         resumeCommand = "${pkgs.sway}/bin/swaymsg 'output * dpms on'";
       }
@@ -1564,7 +1564,8 @@
       # Display
       # -------------------------------------------------------------------------
       scaling = "fill";                    # How to scale images (stretch, fill, fit, center, tile)
-      # image = "";                        # Path to background image (optional)
+      image = "${./wallpaper/landscape.jpg}"; # Path to background image
+
     };
   };
 

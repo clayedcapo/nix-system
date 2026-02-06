@@ -69,6 +69,7 @@
     # -------------------------------------------------------------------------
     # Power Management
     # -------------------------------------------------------------------------
+    # Enable power management through systemd
     powerManagement.enable = true;
 
     # NOTE: experimental, not sure it will work on my machine
