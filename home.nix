@@ -909,18 +909,23 @@
 
     extraConfig = ''
       # Host-specific output configuration
-      # Note: These settings only apply if the output exists
-      # Main laptop (eDP-1): 144Hz display with tearing support for gaming
-      output eDP-1 {
-        mode 1920x1080@144Hz
-        pos 1920 0
-        adaptive_sync off
-        max_render_time off
-        allow_tearing yes
-      }
-
-      # Secondary laptop will ignore eDP-1 config if it has different output name
-      # To add secondary laptop config, use: output <name> { ... }
+      ${if hostname == "main" then ''
+        output eDP-1 {
+          mode 1920x1080@144Hz
+          pos 1920 0
+          adaptive_sync off
+          max_render_time off
+          allow_tearing yes
+        }
+      '' else if hostname == "secondary" then ''
+        output eDP-1 {
+          mode 1366x768@60Hz
+          pos 1920 0
+          adaptive_sync off
+          max_render_time off
+          allow_tearing yes
+        }
+      '' else ""}
 
       # Include system config
       include /etc/sway/config.d/*

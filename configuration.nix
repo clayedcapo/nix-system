@@ -281,8 +281,8 @@
     icons.enable = true;   # icon themes - needed for GUI apps
 
     # Disable those for Sway:
-    autostart.enable = false;  # Sway uses exec mechanism
-    menus.enable = false;      # not used by tofi/wofi
+    autostart.enable = lib.mkDefault false;  # Sway uses exec mechanism
+    menus.enable = lib.mkDefault false;      # not used by tofi/wofi
   };
 
 
