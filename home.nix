@@ -206,6 +206,23 @@
       logo = {
         source = "nixos_small";
       };
+      modules = [
+        "title"
+        "separator"
+        "os"
+        "host"
+        "kernel"
+        "uptime"
+        "packages"
+        "shell"
+        "terminal"
+        "cpu"
+        "gpu"
+        "memory"
+        "disk"
+        "battery"
+        "break"
+      ];
     };
   };
 

@@ -262,6 +262,9 @@
     '';
   };
 
+  # ===========================================================================
+  # XDG
+  # ===========================================================================
   # Series of D-Bus interfaces for primarily sandboxed apps to interect with a "desktop"
   xdg.portal = {
     enable = true;
@@ -285,10 +288,23 @@
     menus.enable = lib.mkDefault false;      # not used by tofi/wofi
   };
 
+  # Enable proposed Default Terminal Execution Specification (https://gitlab.freedesktop.org/xdg/xdg-specs/-/merge_requests/46)
+  xdg.terminal-exec = {
+    enable = true;
+    settings = {
+      default = [
+        "Alacritty.desktop"
+      ];
+    };
+  };
 
   # ===========================================================================
   # USERS
   # ===========================================================================
+  # TODO: Consider setting passwords declaratively somehow
+  # Don't allow mutation of users outside the config
+  # users.mutableUsers = false;
+
   # Using username variable from flake.nix
   users.users.${username} = {
     isNormalUser = true;
@@ -321,6 +337,7 @@
     bash
     helix
     git
+    git-lfs
     gnumake # make build system
     just # command runner, substitutes make, simpler
     fastfetch
@@ -381,8 +398,10 @@
     mtr # `ping` and `traceroute` in one util
     gping # `ping` with graph
     doggo # DNS-client, replacement for `dig`
+    nmap # `nmap`, `ncat`, `nping`
     # httpie
     # curlie # curl with httpie
+    # netplan # declarative network configuration tool
     aria2 # versatile multi-protocol downloader (https://aria2.github.io)
     socat # `netcat` replacement
     iperf # tool to measure IP bandwidth using UDP or TCP
@@ -495,6 +514,37 @@
       emoji = [ "Noto Color Emoji" ];
     };
   };
+
+  # ===========================================================================
+  # CONTAINERIZATION (PODMAN)
+  # ===========================================================================
+  virtualisation.podman = {
+    enable = true;
+    # Enable compatibility layer that will alias the docker commands to the podman commands
+    dockerCompat = true;
+    # Create the podman socket in place of the docker socket for tools that expect docker API
+    dockerSocket.enable = true;
+    # Enables DNS resolution in containers
+    defaultNetwork.settings.dns_enabled = true;
+    # TODO: Maybe enable in the future to enhance workflow
+    # autoPrune.enable = true;
+    # TODO: Same as above. Should be enabled when a need for a programmatic access to a podman CLI arises
+    # networkSocket = {};
+  };
+
+  # Declaratively manage containers as systemd services that auto-start on boot
+  # NOTE: Uncomment and configure if you need long-running containers managed by NixOS
+  # virtualisation.oci-containers = {
+  #   backend = "podman";
+  #   containers.myapp = {
+  #     image = "nginx:latest";
+  #     ports = [ "80:80" ];
+  #     autoStart = true;
+  #   };
+  # };
+
+  # Configure registries for automatic image name resolution in CLI
+  virtualisation.containers.registries.search = [ "docker.io" "quay.io" ];
 
   # ===========================================================================
   # SECURITY
