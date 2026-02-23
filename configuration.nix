@@ -126,8 +126,6 @@
     }
   ];
 
-  # Write incompressible pages to this device (there's no gain from keeping them in RAM)
-  zramSwap.writebackDevice = "/swapfile";
 
   # ===========================================================================
   # NETWORKING
@@ -189,7 +187,8 @@
   # POWER MANAGEMENT
   # ===========================================================================
   # Backlight non-root control
-  programs.light.enable = true;
+  # NOTE: `brightnessctl` provides the same functionality
+  # programs.light.enable = true;
 
   # Power management daemon
   services.power-profiles-daemon.enable = true;
@@ -200,7 +199,8 @@
   # Enables support for suspend-to-RAM and powersave features on laptops
   powerManagement = {
     enable = true;
-    cpuFreqGovernor = "performance";
+    # WARN: Probably conflicts with power-profiles-daemon that sets governer dynamically
+    # cpuFreqGovernor = "performance";
   };
 
   # ===========================================================================
@@ -265,7 +265,7 @@
   # ===========================================================================
   # XDG
   # ===========================================================================
-  # Series of D-Bus interfaces for primarily sandboxed apps to interect with a "desktop"
+  # Series of D-Bus interfaces for primarily sandboxed apps to interact with a "desktop"
   xdg.portal = {
     enable = true;
     # Wayland specific interfaces
@@ -276,7 +276,7 @@
     # Consider using it ONLY when running a lot of binaries through FHS envs
     # xdgOpenUsePortal = true;
 
-    config.common.default = [ "gtk" ];
+    config.common.default = [ "wlr" "gtk" ];
   };
 
   xdg = {
@@ -331,6 +331,10 @@
   # ===========================================================================
   # PACKAGES
   # ===========================================================================
+  # NOTE: Some packages here (fzf, bat, eza, zoxide, fastfetch, tealdeer) are also
+  # configured via Home Manager programs.* modules for shell integration.
+  # They are kept here to make them available to root. With useGlobalPkgs = true,
+  # both reference the same store path — no disk duplication.
   environment.systemPackages = with pkgs; [
     # Basic utilities
     zsh
@@ -338,6 +342,7 @@
     helix
     git
     git-lfs
+    jujutsu
     gnumake # make build system
     just # command runner, substitutes make, simpler
     fastfetch
@@ -390,6 +395,7 @@
     zstd
     unzipNLS # provides `funzip`, `unzip`, `unzipsfx`, `zipgrep`, `zipinfo` commands
     p7zip
+    unrar
 
     # Networking
     wget
@@ -406,6 +412,7 @@
     socat # `netcat` replacement
     iperf # tool to measure IP bandwidth using UDP or TCP
     tcpdump # network sniffer
+    throne # proxy client
 
     # Libraries
     poppler # PDF rendering library
@@ -457,9 +464,9 @@
   # ===========================================================================
   # ENVIRONMENT
   # ===========================================================================
-  environment.variables= {
-    EDITOR = "helix";
-    VISUAL = "helix";
+  environment.variables = {
+    EDITOR = "hx";
+    VISUAL = "hx";
   };
 
   # Add specific shells to /etc/shells to be able to log with them
@@ -607,6 +614,14 @@
   # -------------------------------------------------------------------------
   # https://flatpak.org/setup/NixOS
   services.flatpak.enable = true;
+
+  # -------------------------------------------------------------------------
+  # VPN (Throne)
+  # -------------------------------------------------------------------------
+  programs.throne = {
+    enable = true;
+    tunMode.enable = true;
+  };
 
   # ===========================================================================
   # STATE VERSION

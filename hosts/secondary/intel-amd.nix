@@ -52,10 +52,4 @@
   environment.variables = {
     VDPAU_DRIVER = "va_gl";
   };
-
-  # ===========================================================================
-  # CPU MICROCODE
-  # ===========================================================================
-  # TODO: See if hardware-configuration.nix add it
-  # hardware.cpu.intel.updateMicrocode = true;
 }

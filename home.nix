@@ -41,10 +41,9 @@
     # -------------------------------------------------------------------------
     # Base Tools
     # -------------------------------------------------------------------------
-    # NOTE: Most of them installed system-wide (hence specified in `configuraton.nix`)
+    # NOTE: Most of them installed system-wide (hence specified in `configuration.nix`)
     alacritty
     tmux
-    jujutsu
 
     # -------------------------------------------------------------------------
     # Nix Ecosystem Tools
@@ -60,17 +59,32 @@
     # Development Tools
     # -------------------------------------------------------------------------
     # NOTE: Dev toolchains should be in per-project dev shells, not here
-    gitleaks  # Scan git repos for secrets
-    k6        # Load testing tool
-    devbox    # Simplified dev environments (alternative to raw Nix shells)
-    gh        # GitHub CLI
-    glab      # GitLab CLI
+    gitleaks      # Scan git repos for secrets
+    k6            # Load testing tool
+    direnv        # Trigger nix dev shell loadings on cd'ing into projects directories
+    devbox        # Simplified dev environments (alternative to raw Nix shells)
+    gh            # GitHub CLI
+    glab          # GitLab CLI
+    nil           # LSP for Nix lang
+    statix        # Lints anti-patterns in .nix files
+    deadnix       # Scan Nix files for dead code
+    nixfmt        # Formatter for Nix code
+    taplo         # TOML LSP + formatter
+    iwe           # LSP for Markdown
+    hadolint      # Dockerfile linter
+    actionlint    # GitHub Actions linter
 
     # -------------------------------------------------------------------------
     # Database Clients
     # -------------------------------------------------------------------------
     sqlite
-    pgcli     # PostgreSQL CLI with auto-completion and syntax highlighting
+    postgresql    # Only for client binaries like `psql`, `pg_dump` and etc
+    pgcli         # PostgreSQL CLI with auto-completion and syntax highlighting
+
+    # -------------------------------------------------------------------------
+    # AI tools
+    # -------------------------------------------------------------------------
+    claude-code
 
     # -------------------------------------------------------------------------
     # GUI Applications
@@ -96,7 +110,6 @@
     # Miscellaneous
     # -------------------------------------------------------------------------
     astroterm  # Terminal planetarium
-    iwe # LSP for Markdown
     xdg-utils # cli tools that assist applications with desktop integration tasks
   ];
 
@@ -192,9 +205,10 @@
   # ---------------------------------------------------------------------------
   programs.fd = {
     enable = true;
-    extraOptions = [
-      "-X" "bat"
-    ];
+    # WARN: Can break scripts that depend on fd. Disable for now
+    # extraOptions = [
+    #   "-X" "bat"
+    # ];
   };
 
   # ---------------------------------------------------------------------------
@@ -390,7 +404,8 @@
 
       # System shortcuts
       alias rebuild='sudo nixos-rebuild switch --flake ~/.config/nixos#${hostname}'
-      alias rebuild-home='home-manager switch --flake ~/.config/nixos#${username}'
+      # For separate home manager:
+      # alias rebuild-home='home-manager switch --flake ~/.config/nixos#${username}'
       alias nix-clean='nix-collect-garbage -d && sudo nix-collect-garbage -d'
       alias nix-search='nix search nixpkgs'
 
@@ -484,6 +499,16 @@
   };
 
   # ===========================================================================
+  # DEVELOPMENT ENVIRONMENTS (DIRENV)
+  # ===========================================================================
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+    enableZshIntegration = true;
+    enableBashIntegration = true;
+  };
+
+  # ===========================================================================
   # TMUX (Terminal Multiplexer)
   # ===========================================================================
   programs.tmux = {
@@ -517,7 +542,7 @@
       # -----------------------------------------------------------------------
       # Window & Pane Settings
       # -----------------------------------------------------------------------
-      # setw -g pane-base-index 1        # Start pane numbering at 1
+      setw -g pane-base-index 1        # Start pane numbering at 1
       setw -g aggressive-resize on     # Smart window sizing
       set -g renumber-windows on       # Renumber windows when one is closed
       set -g set-titles on             # Set terminal title
@@ -533,11 +558,11 @@
 
       # Status bar content
       set -g status-left '[#S] '                 # Session name
-      set -g status-right \'\'                     # Empty right side (minimal)
+      set -g status-right ""                     # Empty right side (minimal)
 
       # Status bar colors (matching system theme)
       set -g status-style 'bg=#000000 fg=#b0b0b0'           # Black bg, gray text
-      set -g window-status-current-style 'fg=#ffffff bold'  # White + bold for current
+      set -g window-status-current-style 'bg=#000000 fg=#ffffff bold'  # White + bold for current
       set -g window-status-separator ' '                    # Window separator
 
       # -----------------------------------------------------------------------
@@ -581,7 +606,7 @@
       bind -n C-l if-shell "$is_vim" "send-keys C-l"  "select-pane -R"
 
       # Restore Ctrl+l to clear screen (shadowed by above)
-      bind C-l send-keys 'C-l'
+      # bind C-l send-keys 'C-l'
 
       # -----------------------------------------------------------------------
       # Key Bindings - Pane Resizing
@@ -624,7 +649,7 @@
       # Vi-style selection and copying
       bind -T copy-mode-vi v send-keys -X begin-selection
       bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel
-      bind -T copy-mode-vi C-v send-keys -X rectangle-toggle
+      bind -T copy-mode-vi 'C-v' send-keys -X rectangle-toggle
 
       # Copy to system clipboard (requires wl-clipboard on Wayland)
       bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "wl-copy"
@@ -650,26 +675,18 @@
     '';
 
     # ---------------------------------------------------------------------------
-    # Plugins (optional - uncomment to enable)
+    # Plugins
     # ---------------------------------------------------------------------------
-    # plugins = with pkgs.tmuxPlugins; [
-    #   {
-    #     plugin = resurrect;          # Save/restore tmux sessions
-    #     extraConfig = ''
-    #       set -g @resurrect-strategy-nvim 'session'
-    #       set -g @resurrect-capture-pane-contents 'on'
-    #     '';
-    #   }
-    #   {
-    #     plugin = continuum;          # Auto-save tmux sessions
-    #     extraConfig = ''
-    #       set -g @continuum-restore 'on'
-    #       set -g @continuum-save-interval '15'
-    #     '';
-    #   }
-    #   yank                           # Enhanced copy/paste
-    #   sensible                       # Sensible defaults
-    # ];
+    plugins = with pkgs.tmuxPlugins; [
+      {
+        # Auto-save tmux sessions
+        plugin = continuum;
+        extraConfig = ''
+          set -g @continuum-restore 'on'
+          set -g @continuum-save-interval '15'
+        '';
+      }
+    ];
   };
 
   # ===========================================================================
@@ -711,7 +728,9 @@
       # Startup Applications
       # -----------------------------------------------------------------------
       startup = [
-        { command = "mako"; }    # Notification daemon
+        # Notification daemon
+        # NOTE: Enabled as systemd service via `services.mako`
+        # { command = "mako"; }
         # wob: Wayland Overlay Bar for volume/brightness feedback
         { command = "rm -f $XDG_RUNTIME_DIR/wob.sock && mkfifo $XDG_RUNTIME_DIR/wob.sock && tail -f $XDG_RUNTIME_DIR/wob.sock | wob"; }
       ];
@@ -982,6 +1001,8 @@
           "tray"
           "network"
           "custom/separator"
+          "pulseaudio"
+          "custom/separator"
           "cpu"
           "custom/separator"
           "memory"
@@ -1028,7 +1049,7 @@
 
         network = {
           format-wifi = "wifi {bandwidthDownBits}";
-          format-ethernet = "enth {bandwidthDownBits}";
+          format-ethernet = "eth {bandwidthDownBits}";
           format-disconnected = "no network";
           interval = 5;
           tooltip = false;
@@ -1444,6 +1465,7 @@
       };
     };
   };
+
   # ===========================================================================
   # NOTIFICATIONS (Mako)
   # ===========================================================================
@@ -2288,13 +2310,102 @@
       };
   };
 
-  # Enable relatively new (hence not always supported) specification for a standardized way to
-  # launch user's preferred terminal.
-  xdg.terminal-exec = {
+  # ===========================================================================
+  # AI TOOLS
+  # ===========================================================================
+  # ---------------------------------------------------------------------------
+  # Claude Code - AI-powered CLI coding assistant
+  # ---------------------------------------------------------------------------
+  # Docs: https://docs.anthropic.com/en/docs/claude-code
+  programs.claude-code = {
     enable = true;
+
+    # -------------------------------------------------------------------------
+    # Memory (CLAUDE.md)
+    # -------------------------------------------------------------------------
+    # Global context injected into every Claude Code session automatically.
+    # Eliminates repetitive "my system is..." prompts at the start of each session.
+    memory.text = ''
+      # System: NixOS with flakes and Home Manager
+      - Hosts: `main` (AMD iGPU + NVIDIA dGPU, 16 GB RAM) | `secondary` (Intel iGPU + AMD dGPU, 4 GB RAM)
+      - Shared base in `configuration.nix` and `home.nix`; per-host overrides under `hosts/<name>/`
+      - Shell: zsh | Editor: helix | WM: Sway | VCS: git + jj
+      - Containers: Podman | Nix formatter: nixfmt | Linters: statix, deadnix
+
+      # Nix Workflow
+      - Formatter: `nixfmt` | Linters: `statix check`, `deadnix`
+      - Rebuild (wiht integrated home manager): sudo nixos-rebuild switch --flake ~/.config/nixos#<host>`
+    '';
+
+    # -------------------------------------------------------------------------
+    # Permissions
+    # -------------------------------------------------------------------------
+    # `allow`: skip the confirmation prompt for safe, non-destructive commands.
+    # still asks before running shell commands not covered by the allow list.
     settings = {
-      default = [ "Alacritty.desktop" ];
+      permissions = {
+        allow = [
+          # Search and file inspection (read-only)
+          "Bash(rg:*)"
+          "Bash(fd:*)"
+          "Bash(bat:*)"
+          "Bash(eza:*)"
+
+          # Git read-only operations
+          "Bash(git status:*)"
+          "Bash(git log:*)"
+          "Bash(git diff:*)"
+          "Bash(git show:*)"
+          "Bash(git branch:*)"
+
+          # Nix inspection and linting (non-destructive)
+          "Bash(nix flake show:*)"
+          "Bash(nix flake check:*)"
+          "Bash(statix check:*)"
+          "Bash(deadnix:*)"
+          "Bash(nixfmt:*)"
+        ];
+
+        # Claude edits files without prompting, but
+        defaultMode = "acceptEdits";
+      };
     };
+
+    # -------------------------------------------------------------------------
+    # Hooks (skipped for now)
+    # -------------------------------------------------------------------------
+    # Hooks run shell commands on tool lifecycle events (PreToolUse/PostToolUse).
+    # WARN: Experemental. Check how it performs in the future.
+      hooks = {
+        PostToolUse = ''
+          if echo "$CLAUDE_TOOL_INPUT" | grep -q '\.nix"'; then
+            statix check . 2>/dev/null || true
+          fi
+        '';
+      };
+
+    # -------------------------------------------------------------------------
+    # MCP Servers (skipped for now)
+    # -------------------------------------------------------------------------
+    # Model Context Protocol servers extend Claude with external integrations
+    # (databases, APIs, file systems, etc.).  Worth revisiting when in need of
+    # a specific integration, e.g., the GitHub MCP server via `gh mcp serve`:
+    #
+    #   mcpServers = {
+    #     github = {
+    #       command = "gh";
+    #       args = [ "mcp" "serve" ];
+    #       type = "stdio";
+    #     };
+    #   };
+
+    # -------------------------------------------------------------------------
+    # Agents / Commands / Skills (skipped for now)
+    # -------------------------------------------------------------------------
+    # Custom reusable automation for repeated multi-step Claude workflows.
+    # Define once you have a recurring pattern worth encoding, e.g., a
+    # `nixos-update` agent that bumps flake inputs, runs `nix flake check`,
+    # and rebuilds.  Not worth the overhead until such patterns emerge.
   };
 
   # ===========================================================================

@@ -91,7 +91,7 @@
       rocm-opencl-icd
     ];
 
-    # NOTE: Probably depricated in 25.x
+    # NOTE: Probably deprecated in 25.x
     # extraPackages32 = with pkgs; [
     #   driversi686Linux.amdvlk
     # ];
@@ -116,16 +116,21 @@
   # WAYLAND (Sway) WORKAROUNDS
   # ===========================================================================
   #
-  # NVIDIA specific env variables:
-  #   - LIBVA_DRIVER_NAME=nvidia: Tells VA-API (video acceleration API) to use NVIDIA's driver
-  #   - __GLX_VENDOR_LIBRARY_NAME=nvidia: Tells OpenGL to use NVIDIA's libraries
-  #   - NVD_BACKEND=direct: Uses NVIDIA's direct backend for video decoding
-  #   - GBM_BACKEND=nvidia-drm: Tells GBM (Generic Buffer Management) to use NVIDIA's DRM backend
+  # In this PRIME offload setup, AMD iGPU is the primary GPU and handles all
+  # rendering by default. NVIDIA dGPU is only used when explicitly requested
+  # via `prime-run <app>` (provided by hardware.nvidia.prime.offload.enableOffloadCmd).
+  #
+  # The following env vars are intentionally NOT set globally:
+  #   - __GLX_VENDOR_LIBRARY_NAME=nvidia — would force all OpenGL through NVIDIA,
+  #     defeating offload mode and breaking apps that expect Mesa (Firefox, Electron)
+  #   - LIBVA_DRIVER_NAME=nvidia — would force all VA-API (video decode) through
+  #     NVIDIA, breaking hardware video acceleration on the AMD iGPU
+  #   - GBM_BACKEND=nvidia-drm — would force buffer management through NVIDIA,
+  #     conflicting with Mesa's native GBM on the AMD primary GPU
+  #
+  # NVD_BACKEND=direct is safe to set globally — it only affects NVIDIA's own
+  # VA-API driver when it is actually in use (i.e., via prime-run).
   programs.sway.extraSessionCommands = ''
-    export WLR_NO_HARDWARE_CURSORS=1
-    export __GLX_VENDOR_LIBRARY_NAME=nvidia
-    export LIBVA_DRIVER_NAME=nvidia
     export NVD_BACKEND=direct
-    export GBM_BACKEND=nvidia-drm
   '';
 }
