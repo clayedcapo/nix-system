@@ -85,25 +85,26 @@
   # KMSCON is a kms/dri-based userspace virtual terminal implementation.
   # It supports a richer feature set than the standard linux console VT,
   # including full unicode support, and when the video card supports DRM should be much faster.
-  services.kmscon = {
-    enable = true;
-    fonts = [
-      {
-        name = "AporeticSerifMonoNerdFont";
-        package = inputs.aporetic-nerd-font.packages.${pkgs.system}.default;
-      }
-      {
-        name = "JetBrainsMono Nerd Font";
-        package = pkgs.nerd-fonts.jetbrains-mono;
-      }
-    ];
-    extraOptions = "--term xterm-256color";
-    extraConfig = "font-size=13";
-    # Whether to use 3D hardware acceleration to render the console.
-    hwRender = true;
-    # NOTE: Maybe keep tty1 as traditional VT for emergency recovery
-    # extraConfig = ''
-    #   xkb-layout=us
-    # '';
-  };
+  # services.kmscon = {
+  #   enable = true;
+  #   fonts = [
+  #     {
+  #       name = "AporeticSerifMonoNerdFont";
+  #       package = inputs.aporetic-nerd-font.packages.${pkgs.system}.default;
+  #     }
+  #     {
+  #       name = "JetBrainsMono Nerd Font";
+  #       package = pkgs.nerd-fonts.jetbrains-mono;
+  #     }
+  #   ];
+  #   extraOptions = "--term xterm-256color";
+  #   extraConfig = "font-size=13";
+  #   # Whether to use 3D hardware acceleration to render the console.
+  #   # WARN: Unable to run sway manually from tty with it
+  #   hwRender = false;
+  #   # NOTE: Maybe keep tty1 as traditional VT for emergency recovery
+  #   # extraConfig = ''
+  #   #   xkb-layout=us
+  #   # '';
+  # };
 }
