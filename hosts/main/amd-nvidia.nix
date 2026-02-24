@@ -1,9 +1,9 @@
 # =============================================================================
 # GPU CONFIGURATION: AMD (integrated) + NVIDIA (discrete)
 # =============================================================================
-# PRIME offload configuration for hybrid graphics
-# AMD iGPU is primary (power saving), NVIDIA dGPU on demand (performance)
-{ config, pkgs, ... }:
+# PRIME sync configuration for hybrid graphics
+# NVIDIA dGPU renders everything, AMD iGPU displays output (better compatibility)
+{ config, pkgs, lib, ... }:
 {
   # ===========================================================================
   # KERNEL MODULES
@@ -52,14 +52,13 @@
     modesetting.enable = true;
 
     # -------------------------------------------------------------------------
-    # PRIME Offload
+    # PRIME Sync (NVIDIA as Primary Renderer)
     # -------------------------------------------------------------------------
+    # NVIDIA renders everything, AMD iGPU outputs to display
+    # This ensures all apps use NVIDIA by default without per-app configuration
     prime = {
-      offload = {
-        enable = true;
-        # Enables commands like `prime` for manual offloading
-        enableOffloadCmd = true;
-      };
+      # PRIME Sync: NVIDIA renders, AMD outputs to screen
+      sync.enable = true;
 
       # NOTE: Find with: lspci | grep -E "VGA|3D"
       amdgpuBusId = "PCI:5:0:0";
@@ -109,24 +108,20 @@
   # hardware.cpu.amd.updateMicrocode = true;
   #
   # ===========================================================================
-  # WAYLAND (Sway) WORKAROUNDS
+  # WAYLAND (Sway) ENVIRONMENT
   # ===========================================================================
   #
-  # In this PRIME offload setup, AMD iGPU is the primary GPU and handles all
-  # rendering by default. NVIDIA dGPU is only used when explicitly requested
-  # via `prime-run <app>` (provided by hardware.nvidia.prime.offload.enableOffloadCmd).
-  #
-  # The following env vars are intentionally NOT set globally:
-  #   - __GLX_VENDOR_LIBRARY_NAME=nvidia — would force all OpenGL through NVIDIA,
-  #     defeating offload mode and breaking apps that expect Mesa (Firefox, Electron)
-  #   - LIBVA_DRIVER_NAME=nvidia — would force all VA-API (video decode) through
-  #     NVIDIA, breaking hardware video acceleration on the AMD iGPU
-  #   - GBM_BACKEND=nvidia-drm — would force buffer management through NVIDIA,
-  #     conflicting with Mesa's native GBM on the AMD primary GPU
-  #
-  # NVD_BACKEND=direct is safe to set globally — it only affects NVIDIA's own
-  # VA-API driver when it is actually in use (i.e., via prime-run).
-  programs.sway.extraSessionCommands = ''
+  # With PRIME sync, NVIDIA is the primary rendering GPU for all applications.
+  # These environment variables ensure proper Wayland/NVIDIA integration.
+  # lib.mkAfter ensures these are APPENDED to base Wayland vars in configuration.nix
+  programs.sway.extraSessionCommands = lib.mkAfter ''
+    # NVIDIA-specific Wayland variables
+    export __GLX_VENDOR_LIBRARY_NAME=nvidia
+    export GBM_BACKEND=nvidia-drm
+    export __VK_LAYER_NV_optimus=NVIDIA_only
+
+    # Video acceleration
     export NVD_BACKEND=direct
+    export LIBVA_DRIVER_NAME=nvidia
   '';
 }

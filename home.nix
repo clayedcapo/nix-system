@@ -23,73 +23,6 @@
   # Wallpaper
   home.file.".config/wallpaper/landscape.jpg".source = ./wallpaper/landscape.jpg;
 
-  # ---------------------------------------------------------------------------
-  # NVIDIA Desktop Entries (main host only)
-  # ---------------------------------------------------------------------------
-  # Override desktop entries to use NVIDIA GPU for graphics-intensive apps
-  home.file.".local/share/applications/vivaldi.desktop" = lib.mkIf (hostname == "main") {
-    text = ''
-      [Desktop Entry]
-      Name=Vivaldi (NVIDIA)
-      Exec=nvidia-offload vivaldi %U
-      Icon=vivaldi
-      Terminal=false
-      Type=Application
-      Categories=Network;WebBrowser;
-      MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;
-    '';
-  };
-
-  home.file.".local/share/applications/vlc.desktop" = lib.mkIf (hostname == "main") {
-    text = ''
-      [Desktop Entry]
-      Name=VLC (NVIDIA)
-      Exec=nvidia-offload vlc %U
-      Icon=vlc
-      Terminal=false
-      Type=Application
-      Categories=AudioVideo;Player;Recorder;
-      MimeType=video/*;audio/*;
-    '';
-  };
-
-  home.file.".local/share/applications/telegram-desktop.desktop" = lib.mkIf (hostname == "main") {
-    text = ''
-      [Desktop Entry]
-      Name=Telegram (NVIDIA)
-      Exec=nvidia-offload telegram-desktop -- %u
-      Icon=telegram
-      Terminal=false
-      Type=Application
-      Categories=Network;InstantMessaging;
-      MimeType=x-scheme-handler/tg;
-    '';
-  };
-
-  home.file.".local/share/applications/zoom.desktop" = lib.mkIf (hostname == "main") {
-    text = ''
-      [Desktop Entry]
-      Name=Zoom (NVIDIA)
-      Exec=nvidia-offload zoom %U
-      Icon=zoom
-      Terminal=false
-      Type=Application
-      Categories=Network;VideoConference;
-    '';
-  };
-
-  home.file.".local/share/applications/obsidian.desktop" = lib.mkIf (hostname == "main") {
-    text = ''
-      [Desktop Entry]
-      Name=Obsidian (NVIDIA)
-      Exec=nvidia-offload obsidian %U
-      Icon=obsidian
-      Terminal=false
-      Type=Application
-      Categories=Office;
-    '';
-  };
-
   home.shell.enableZshIntegration = true;
   home.shell.enableBashIntegration = true;
 
@@ -221,17 +154,17 @@
     enableZshIntegration = true;
     enableBashIntegration = true;
 
-    defaultCommand = "fd --type f --color=always";
+    defaultCommand = "fd --type f";
     defaultOptions = [
       "--style full"
       "--preview='bat --color=always --style=numbers --line-range=:500 {}'"
     ];
 
     # Alt+C configuration (directory navigation)
-    changeDirWidgetCommand = "fd --type d --color=always";
+    changeDirWidgetCommand = "fd --type d";
     changeDirWidgetOptions = [
       "--style full"
-      "--preview 'tree -C {} | head -200'"
+      "--preview='tree -C {} | head -200'"
     ];
 
     # Ctrl+T configuration (file selection)
@@ -2283,11 +2216,12 @@
   # CURSOR THEME (System-wide for Wayland)
   # ===========================================================================
   home.pointerCursor = {
-    name = "macOS-BigSur";
+    name = "macOS-White";  # Available themes: "macOS" (black) or "macOS-White"
     package = pkgs.apple-cursor;
     size = 24;
-    gtk.enable = true;  # Also apply to GTK apps
-    x11.enable = true;  # Also apply to X11 apps (if any)
+    gtk.enable = true;   # Apply to GTK apps
+    x11.enable = true;   # Apply to X11 apps
+    sway.enable = true;  # Apply to Sway/Wayland
   };
 
   # ===========================================================================
@@ -2305,6 +2239,11 @@
     iconTheme = {
       name = "Nordzy-Icon";
       package = pkgs.nordzy-icon-theme;
+    };
+
+    cursorTheme = {
+      name = "macOS-White";
+      size = 24;
     };
 
     # NOTE: gtk.colorScheme is deprecated in newer Home Manager versions
