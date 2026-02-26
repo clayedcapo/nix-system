@@ -65,6 +65,7 @@
     devbox        # Simplified dev environments (alternative to raw Nix shells)
     gh            # GitHub CLI
     glab          # GitLab CLI
+    jjui          # TUI for jujutsu
     nil           # LSP for Nix lang
     statix        # Lints anti-patterns in .nix files
     deadnix       # Scan Nix files for dead code
@@ -172,7 +173,9 @@
     # fileWidgetOptions = [ ];
 
     # Ctrl+R configuration (history search)
-    # historyWidgetOptions = [ ];
+    historyWidgetOptions = [
+      "--no-preview"
+    ];
   };
 
   # ---------------------------------------------------------------------------
@@ -418,6 +421,9 @@
       alias zshrc='$EDITOR ~/.zshrc'
       alias helix='hx'  # hx is the actual binary name
 
+      # Better man with colors
+      alias man='batman'
+
       # -----------------------------------------------------------------------
       # Key Bindings
       # -----------------------------------------------------------------------
@@ -466,6 +472,12 @@
         local dir
         dir=$(fd --type d --hidden --exclude .git | fzf --preview 'tree -C {} | head -200')
         [ -n "$dir" ] && cd "$dir"
+      }
+
+      # Create nix shell through direnv, targeting flake output from github
+      dvd() {
+        echo "use flake \"github:clayedcapo/nix-dev-templates#$1\"" >> .envrc
+        direnv allow
       }
 
       # -----------------------------------------------------------------------
@@ -1639,6 +1651,25 @@
   };
 
   # ===========================================================================
+  # JUJUTSU
+  # ===========================================================================
+  programs.jujutsu = {
+    enable = true;
+    settings = {
+      user = {
+        email = "wesunnn2@gmail.com";
+        name = "Ilya Sergeev";
+      };
+      ui.paginate = "never";
+    };
+  };
+
+  # TODO: configure later
+  # programs.jjui = {
+  #   enable = true;
+  # };
+
+  # ===========================================================================
   # GIT
   # ===========================================================================
   # WARN: `programs.git` generates config at: ~/.config/git/config
@@ -1657,6 +1688,13 @@
     # Handles large binary files (images, videos, datasets) efficiently
     # by storing them outside the main repository
     lfs.enable = true;
+
+    # Entries in user specific `.gitignore`
+    ignores = [
+      ".direnv"
+      ".envrc"
+      "**/.claude/settings.local.json"
+    ];
 
     settings = {
       user.name = "Ilya Sergeev";
@@ -1679,6 +1717,11 @@
       diff.colorMoved = "default";     # Highlight moved code blocks in different color
 
       commit.verbose = true;           # Show full diff in commit message editor
+
+      pager = {
+        branch = false;
+        log = false;
+      };
 
       # -------------------------------------------------------------------------
       # GitLab Specific
@@ -1745,6 +1788,8 @@
     # Automatically configure git to use delta for all diff operations
     # Sets: core.pager, interactive.diffFilter, diff.colorMoved
     enableGitIntegration = true;
+    # Same, but for jj
+    enableJujutsuIntegration = true;
 
     options = {
       diff-so-fancy = true;         # Use diff-so-fancy inspired style
@@ -2218,7 +2263,7 @@
   home.pointerCursor = {
     name = "macOS-White";  # Available themes: "macOS" (black) or "macOS-White"
     package = pkgs.apple-cursor;
-    size = 24;
+    size = 26;
     gtk.enable = true;   # Apply to GTK apps
     x11.enable = true;   # Apply to X11 apps
     sway.enable = true;  # Apply to Sway/Wayland
@@ -2243,7 +2288,7 @@
 
     cursorTheme = {
       name = "macOS-White";
-      size = 24;
+      size = 26;
     };
 
     # NOTE: gtk.colorScheme is deprecated in newer Home Manager versions

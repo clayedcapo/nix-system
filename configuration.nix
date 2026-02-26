@@ -603,6 +603,7 @@
           main = {
             # capslock on hold - ctrl, on tap - esc
             capslock = "overload(control, esc)";
+            esc = "capslock";
           };
         };
       };
