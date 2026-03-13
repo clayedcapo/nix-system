@@ -3,7 +3,7 @@
 # =============================================================================
 # This file contains configuration shared between all hosts
 # Host-specific shared settings are in ./hosts/<hostname>/
-{ config, pkgs, lib, inputs, pkgs-unstable, username, hostname, ... }:
+{ config, pkgs, lib, inputs, pkgs-stable, username, hostname, ... }:
 # ^
 # | These are the arguments passed to this module:
 # | - config: The full system configuration
@@ -293,7 +293,8 @@
     enable = true;
     settings = {
       default = [
-        "Alacritty.desktop"
+        # "Alacritty.desktop"
+        "com.mitchellh.ghostty.desktop"
       ];
     };
   };

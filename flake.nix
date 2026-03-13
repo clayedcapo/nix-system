@@ -35,15 +35,14 @@
     # -------------------------------------------------------------------------
     # Core: Nixpkgs
     # -------------------------------------------------------------------------
-    # NOTE: 25.11 stable as default, change to unstable in the future maybe
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
     # -------------------------------------------------------------------------
     # Core: Home Manager
     # -------------------------------------------------------------------------
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -77,7 +76,7 @@
   # ===========================================================================
   # OUTPUTS
   # ===========================================================================
-  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, disko, nur, ... }@inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, disko, nur, ... }@inputs:
     let
       system = "x86_64-linux";
       username = "clayedcapo";
@@ -92,7 +91,7 @@
       #     allowUnfree = true;  # Allow proprietary packages (NVIDIA drivers, etc.)
       #   };
       # };
-      pkgs-unstable = import nixpkgs-unstable {
+      pkgs-stable = import nixpkgs-stable {
         inherit system;
         config = {
           allowUnfree = true;
@@ -109,7 +108,7 @@
         # Additional custom inputs to all sub-modules
         specialArgs = {
           inherit inputs;
-          inherit pkgs-unstable;
+          inherit pkgs-stable;
           inherit username;
           inherit hostname;
         };
@@ -149,7 +148,7 @@
               # Pass extra arguments to Home Manager modules
               extraSpecialArgs = {
                 inherit inputs;
-                inherit pkgs-unstable;
+                inherit pkgs-stable;
                 inherit username;
                 inherit hostname;
               };

@@ -3,7 +3,7 @@
 # =============================================================================
 # User-specific configuration managed by Home Manager
 # This file is imported by flake.nix as a NixOS module
-{ config, pkgs, lib, inputs, pkgs-unstable, username, hostname, ... }:
+{ config, pkgs, lib, inputs, pkgs-stable, username, hostname, ... }:
 # ^
 # | Arguments passed from flake.nix via extraSpecialArgs:
 # | - config: Home Manager configuration (for self-references)
@@ -22,6 +22,9 @@
 
   # Wallpaper
   home.file.".config/wallpaper/landscape.jpg".source = ./wallpaper/landscape.jpg;
+
+  # Ghostty custom shaders
+  home.file.".config/ghostty/shaders/cursor.glsl".source = ./ghostty-shaders/cursor.glsl;
 
   home.shell.enableZshIntegration = true;
   home.shell.enableBashIntegration = true;
@@ -43,6 +46,7 @@
     # -------------------------------------------------------------------------
     # NOTE: Most of them installed system-wide (hence specified in `configuration.nix`)
     alacritty
+    ghostty
     tmux
 
     # -------------------------------------------------------------------------
@@ -111,6 +115,7 @@
     # Miscellaneous
     # -------------------------------------------------------------------------
     astroterm  # Terminal planetarium
+    exercism # CLI for exercism.io
     xdg-utils # cli tools that assist applications with desktop integration tasks
   ];
 
@@ -275,7 +280,7 @@
     # Environment Variables
     # ---------------------------------------------------------------------------
     sessionVariables = {
-      TERMINAL = "alacritty";
+      TERMINAL = "ghostty";
       BROWSER = "vivaldi";
     };
 
@@ -476,7 +481,7 @@
 
       # Create nix shell through direnv, targeting flake output from github
       dvd() {
-        echo "use flake \"github:clayedcapo/nix-dev-templates#$1\"" >> .envrc
+        echo "use flake \"github:clayedcapo/dev-templates#$1\"" >> .envrc
         direnv allow
       }
 
@@ -581,10 +586,19 @@
       set -g window-status-separator ' '                    # Window separator
 
       # -----------------------------------------------------------------------
-      # Pane Border Colors
+      # Pane Border Colors & Titles
       # -----------------------------------------------------------------------
       set -g pane-border-style 'fg=#50585d'                 # Inactive pane border (comment gray)
       set -g pane-active-border-style 'fg=#8ebeec'          # Active pane border (info blue)
+
+      # Pane border titles configuration
+      set -g pane-border-status bottom                      # Show pane titles at bottom
+      set -g pane-border-lines heavy                        # Use heavy border style
+
+      # Explicitly set the style for pane border format text to prevent '#' interpretation issues
+      # The #[...] at the start sets explicit colors, preventing tmux from treating trailing '#'
+      # in pane titles as format variables (which causes color inversion)
+      setw -g pane-border-format '#[fg=#b0b0b0,bg=#000000] #{pane_index} #{pane_title} '
 
       # -----------------------------------------------------------------------
       # Message & Command Line Colors
@@ -717,7 +731,7 @@
       # General Settings
       # -----------------------------------------------------------------------
       modifier = "Mod4";  # Super/Windows key
-      terminal = "alacritty";
+      terminal = "ghostty";
       menu = "tofi-run | xargs swaymsg exec --";
 
       fonts = {
@@ -757,7 +771,8 @@
         mod = config.wayland.windowManager.sway.config.modifier;
       in {
         # Basic
-        "${mod}+Return" = "exec ${pkgs.alacritty}/bin/alacritty";
+        "${mod}+Return" = "exec ${pkgs.ghostty}/bin/ghostty +new-window";
+        # "${mod}+Return" = "exec ${pkgs.alacritty}/bin/alacritty";
         "${mod}+Control+Return" = "exec vivaldi";
         "${mod}+q" = "kill";
         "${mod}+d" = "exec ${pkgs.tofi}/bin/tofi-run | xargs swaymsg exec --";
@@ -1261,6 +1276,175 @@
           chars = "\x1b\r";
         }
       ];
+    };
+  };
+
+  # ===========================================================================
+  # GHOSTTY (Terminal Emulator)
+  # ===========================================================================
+  programs.ghostty = {
+    enable = true;
+    enableBashIntegration = true;
+    enableZshIntegration = true;
+    # Enable installation of ghostty configuration syntax for bat
+    installBatSyntax = true;
+
+    settings = {
+      # -----------------------------------------------------------------------
+      # Theme & Colors
+      # -----------------------------------------------------------------------
+      theme = "koda";
+
+      # -----------------------------------------------------------------------
+      # Font Configuration
+      # -----------------------------------------------------------------------
+      font-family = "AporeticSerifMonoNerdFont";
+      font-size = 16;
+      font-feature = "-calt";  # Disable ligatures
+
+      # -----------------------------------------------------------------------
+      # Window Settings
+      # -----------------------------------------------------------------------
+      window-decoration = true;
+      window-padding-x = 6;
+      window-padding-y = 6;
+      window-padding-balance = true;
+      window-padding-color = "background";
+      window-theme = "ghostty";
+      window-save-state = "always";
+
+      # -----------------------------------------------------------------------
+      # Cursor
+      # -----------------------------------------------------------------------
+      cursor-style = "block";
+      cursor-style-blink = false;
+      cursor-color = "#b0b0b0";
+      cursor-text = "#000000";
+
+      # -----------------------------------------------------------------------
+      # Terminal Features
+      # -----------------------------------------------------------------------
+      shell-integration = "zsh";
+      shell-integration-features = "cursor,sudo,title,ssh-env,ssh-teminfo";
+      command = "zsh";
+      # Send notifications if the surface that the command is running in is not focused
+      notify-on-command-finish = "unfocused";
+      notify-on-command-finish-action = "no-bell,notify";
+
+      # -----------------------------------------------------------------------
+      # Scrollback
+      # -----------------------------------------------------------------------
+      scrollbar = "never";
+      scrollback-limit = 10000;
+
+      # -----------------------------------------------------------------------
+      # Links
+      # -----------------------------------------------------------------------
+      link-url = true;
+      link-previews = false;
+
+      # -----------------------------------------------------------------------
+      # Mouse & Clipboard
+      # -----------------------------------------------------------------------
+      clipboard-read = "allow";
+      clipboard-write = "allow";
+      clipboard-trim-trailing-spaces = true;
+      copy-on-select = true;
+      mouse-hide-while-typing = true;
+      right-click-action = "copy-or-paste";
+
+      # -----------------------------------------------------------------------
+      # Shaders
+      # -----------------------------------------------------------------------
+      custom-shader = "shaders/cursor.glsl";
+      custom-shader-animation = true;
+
+      # -----------------------------------------------------------------------
+      # Bell
+      # -----------------------------------------------------------------------
+      audible-bell = false;
+      visual-bell = "false";
+
+      # -----------------------------------------------------------------------
+      # GTK
+      # -----------------------------------------------------------------------
+      gtk-single-instance = "detect";
+      gtk-titlebar = false;
+      gtk-toolbar-style = "flat";
+      # gtk-titlebar-style = "tabs"
+
+      # -----------------------------------------------------------------------
+      # Key Bindings
+      # -----------------------------------------------------------------------
+      # Shift+Enter for newline (matching Alacritty config)
+      keybind = "shift+enter=text:\x1b\r";
+
+      # -----------------------------------------------------------------------
+      # Quitting
+      # -----------------------------------------------------------------------
+      quit-after-last-window-closed = true;
+      quit-after-last-window-closed-delay = "10m";
+
+      # -----------------------------------------------------------------------
+      # Env
+      # -----------------------------------------------------------------------
+      term = "ghostty";
+    };
+
+    # Enable ghostty systemd user service (uses D-Bus integration for faster startups)
+    systemd.enable = true;
+
+    themes = {
+      # Koda theme - matching Helix and Alacritty color scheme
+      koda = {
+        # Base colors
+        background = "#000000";
+        foreground = "#b0b0b0";
+
+        # Cursor colors
+        cursor-color = "#b0b0b0";
+        cursor-text = "#000000";
+
+        # Selection
+        selection-background = "#002353";
+        selection-foreground = "#ffffff";
+
+        # Normal colors (0-7)
+        palette = [
+          # Black
+          "0=#000000"
+          # Red
+          "1=#ff7676"
+          # Green
+          "2=#8a9a7b"
+          # Yellow
+          "3=#d9ba73"
+          # Blue
+          "4=#777777"
+          # Magenta
+          "5=#ffffff"
+          # Cyan
+          "6=#ffffff"
+          # White
+          "7=#ffffff"
+          # Bright black (gray)
+          "8=#000000"
+          # Bright red
+          "9=#ff7676"
+          # Bright green
+          "10=#8a9a7b"
+          # Bright yellow
+          "11=#ffffff"
+          # Bright blue
+          "12=#8ebeec"
+          # Bright magenta
+          "13=#ffffff"
+          # Bright cyan
+          "14=#ffffff"
+          # Bright white
+          "15=#ffffff"
+        ];
+      };
     };
   };
 
