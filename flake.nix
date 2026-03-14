@@ -60,6 +60,14 @@
     nur.url = "github:nix-community/NUR";
 
     # -------------------------------------------------------------------------
+    # Optional: Neovim nightly overlay
+    # -------------------------------------------------------------------------
+    neovim-nightly-overlay = {
+      url = "github:nix-community/neovim-nightly-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # -------------------------------------------------------------------------
     # Optional: Custom packages
     # -------------------------------------------------------------------------
     aporetic-nerd-font = {
@@ -76,7 +84,7 @@
   # ===========================================================================
   # OUTPUTS
   # ===========================================================================
-  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, disko, nur, ... }@inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, disko, nur, neovim-nightly-overlay, ... }@inputs:
     let
       system = "x86_64-linux";
       username = "clayedcapo";
@@ -121,6 +129,7 @@
           # `nixConfig.substituters` in `flake.nix`
           {
             nix.settings.trusted-users = [ "${username}" ];
+            nixpkgs.overlays = [ inputs.neovim-nightly-overlay.overlays.default ];
           }
 
           # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

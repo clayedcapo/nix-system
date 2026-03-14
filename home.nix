@@ -3,7 +3,16 @@
 # =============================================================================
 # User-specific configuration managed by Home Manager
 # This file is imported by flake.nix as a NixOS module
-{ config, pkgs, lib, inputs, pkgs-stable, username, hostname, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  pkgs-stable,
+  username,
+  hostname,
+  ...
+}:
 # ^
 # | Arguments passed from flake.nix via extraSpecialArgs:
 # | - config: Home Manager configuration (for self-references)
@@ -34,7 +43,7 @@
   # ---------------------------------------------------------------------------
   home.sessionVariables = {
     BROWSER = "vivaldi";
-    DELTA_PAGER = "less -R";  # Enable scrolling in `git diff` with delta
+    DELTA_PAGER = "less -R"; # Enable scrolling in `git diff` with delta
   };
 
   # ===========================================================================
@@ -52,39 +61,39 @@
     # -------------------------------------------------------------------------
     # Nix Ecosystem Tools
     # -------------------------------------------------------------------------
-    nix-output-monitor  # Prettier build output with dependency graph (nom)
-    hydra-check         # Check Hydra CI for package build status
-    nix-index           # Locate packages providing a file (nix-locate)
-    nix-init            # Generate Nix derivations from URLs
-    nix-melt            # Ranger-like flake.lock viewer
-    nix-tree            # TUI to visualize derivation dependency graphs
+    nix-output-monitor # Prettier build output with dependency graph (nom)
+    hydra-check # Check Hydra CI for package build status
+    nix-index # Locate packages providing a file (nix-locate)
+    nix-init # Generate Nix derivations from URLs
+    nix-melt # Ranger-like flake.lock viewer
+    nix-tree # TUI to visualize derivation dependency graphs
 
     # -------------------------------------------------------------------------
     # Development Tools
     # -------------------------------------------------------------------------
     # NOTE: Dev toolchains should be in per-project dev shells, not here
-    gitleaks      # Scan git repos for secrets
-    k6            # Load testing tool
-    direnv        # Trigger nix dev shell loadings on cd'ing into projects directories
-    devbox        # Simplified dev environments (alternative to raw Nix shells)
-    gh            # GitHub CLI
-    glab          # GitLab CLI
-    jjui          # TUI for jujutsu
-    nil           # LSP for Nix lang
-    statix        # Lints anti-patterns in .nix files
-    deadnix       # Scan Nix files for dead code
-    nixfmt        # Formatter for Nix code
-    taplo         # TOML LSP + formatter
-    iwe           # LSP for Markdown
-    hadolint      # Dockerfile linter
-    actionlint    # GitHub Actions linter
+    gitleaks # Scan git repos for secrets
+    k6 # Load testing tool
+    direnv # Trigger nix dev shell loadings on cd'ing into projects directories
+    devbox # Simplified dev environments (alternative to raw Nix shells)
+    gh # GitHub CLI
+    glab # GitLab CLI
+    jjui # TUI for jujutsu
+    nil # LSP for Nix lang
+    statix # Lints anti-patterns in .nix files
+    deadnix # Scan Nix files for dead code
+    nixfmt # Formatter for Nix code
+    taplo # TOML LSP + formatter
+    iwe # LSP for Markdown
+    hadolint # Dockerfile linter
+    actionlint # GitHub Actions linter
 
     # -------------------------------------------------------------------------
     # Database Clients
     # -------------------------------------------------------------------------
     sqlite
-    postgresql    # Only for client binaries like `psql`, `pg_dump` and etc
-    pgcli         # PostgreSQL CLI with auto-completion and syntax highlighting
+    postgresql # Only for client binaries like `psql`, `pg_dump` and etc
+    pgcli # PostgreSQL CLI with auto-completion and syntax highlighting
 
     # -------------------------------------------------------------------------
     # AI tools
@@ -106,7 +115,7 @@
     # -------------------------------------------------------------------------
     ffmpeg-full
     vlc
-    imv          # Simple image viewer for Wayland
+    imv # Simple image viewer for Wayland
     pavucontrol
     pandoc
     imagemagick
@@ -114,7 +123,7 @@
     # -------------------------------------------------------------------------
     # Miscellaneous
     # -------------------------------------------------------------------------
-    astroterm  # Terminal planetarium
+    astroterm # Terminal planetarium
     exercism # CLI for exercism.io
     xdg-utils # cli tools that assist applications with desktop integration tasks
   ];
@@ -127,9 +136,9 @@
   # ---------------------------------------------------------------------------
   programs.eza = {
     enable = true;
-    enableZshIntegration = true;   # Creates `ls` alias
+    enableZshIntegration = true; # Creates `ls` alias
     enableBashIntegration = true;
-    git = true;       # Show git status for files
+    git = true; # Show git status for files
     colors = "always";
     icons = "auto";
   };
@@ -141,10 +150,15 @@
     enable = true;
     config = {
       theme = "ansi";
-      pager = "less -KFR";  # K=quit on Ctrl+C, F=quit if fits screen, R=raw control chars
+      pager = "less -KFR"; # K=quit on Ctrl+C, F=quit if fits screen, R=raw control chars
     };
     # NOTE: Maybe consider to use analogous shell scripts themselves for more flexibility
-    extraPackages = with pkgs.bat-extras; [ batdiff batman batgrep batwatch ];
+    extraPackages = with pkgs.bat-extras; [
+      batdiff
+      batman
+      batgrep
+      batwatch
+    ];
   };
 
   # ---------------------------------------------------------------------------
@@ -188,7 +202,7 @@
   # ---------------------------------------------------------------------------
   programs.tealdeer = {
     enable = true;
-    enableAutoUpdates = false;  # Manual updates with `tldr --update`
+    enableAutoUpdates = false; # Manual updates with `tldr --update`
     settings = {
       display = {
         compact = false;
@@ -272,9 +286,9 @@
     # ---------------------------------------------------------------------------
     # Core Features
     # ---------------------------------------------------------------------------
-    enableCompletion = true;           # Enable tab completion
-    autosuggestion.enable = true;      # Fish-like autosuggestions from history
-    syntaxHighlighting.enable = true;  # Syntax highlighting for commands
+    enableCompletion = true; # Enable tab completion
+    autosuggestion.enable = true; # Fish-like autosuggestions from history
+    syntaxHighlighting.enable = true; # Syntax highlighting for commands
 
     # ---------------------------------------------------------------------------
     # Environment Variables
@@ -289,14 +303,14 @@
     # ---------------------------------------------------------------------------
     history = {
       path = "${config.home.homeDirectory}/.zsh_history";
-      save = 100000;              # Number of commands to save
-      size = 100000;              # Number of commands to keep in memory
-      share = true;               # Share history between sessions
-      extended = true;            # Save timestamps
-      ignoreDups = true;          # Don't save duplicate commands
-      ignoreSpace = true;         # Don't save commands starting with space
-      ignoreAllDups = true;       # Remove all earlier duplicates when adding new
-      expireDuplicatesFirst = true;  # Expire duplicates first when trimming
+      save = 100000; # Number of commands to save
+      size = 100000; # Number of commands to keep in memory
+      share = true; # Share history between sessions
+      extended = true; # Save timestamps
+      ignoreDups = true; # Don't save duplicate commands
+      ignoreSpace = true; # Don't save commands starting with space
+      ignoreAllDups = true; # Remove all earlier duplicates when adding new
+      expireDuplicatesFirst = true; # Expire duplicates first when trimming
     };
 
     # ---------------------------------------------------------------------------
@@ -498,9 +512,9 @@
     shellAliases = {
       # These complement the aliases in initExtra
       # Listed here for visibility in Home Manager config
-      cat = "bat";           # Use bat instead of cat (syntax highlighting)
-      ls = "eza";            # Already configured via programs.eza
-      tree = "eza --tree";   # Tree view with eza
+      cat = "bat"; # Use bat instead of cat (syntax highlighting)
+      ls = "eza"; # Already configured via programs.eza
+      tree = "eza --tree"; # Tree view with eza
     };
 
     # ---------------------------------------------------------------------------
@@ -534,17 +548,17 @@
     # ---------------------------------------------------------------------------
     # Terminal Settings
     # ---------------------------------------------------------------------------
-    terminal = "tmux-256color";      # Enable 256 color support
-    historyLimit = 50000;            # Scrollback buffer size
-    escapeTime = 10;                 # Reduce ESC delay (important for helix/vim)
+    terminal = "tmux-256color"; # Enable 256 color support
+    historyLimit = 50000; # Scrollback buffer size
+    escapeTime = 10; # Reduce ESC delay (important for helix/vim)
 
     # ---------------------------------------------------------------------------
     # General Behavior
     # ---------------------------------------------------------------------------
-    mouse = true;                    # Enable mouse support
-    keyMode = "vi";                  # Vi-style key bindings in copy mode
-    customPaneNavigationAndResize = true;  # Sensible pane navigation
-    resizeAmount = 5;                # Resize panes by 5 cells
+    mouse = true; # Enable mouse support
+    keyMode = "vi"; # Vi-style key bindings in copy mode
+    customPaneNavigationAndResize = true; # Sensible pane navigation
+    resizeAmount = 5; # Resize panes by 5 cells
 
     # ---------------------------------------------------------------------------
     # Custom Configuration
@@ -585,20 +599,16 @@
       set -g window-status-current-style 'bg=#000000 fg=#ffffff bold'  # White + bold for current
       set -g window-status-separator ' '                    # Window separator
 
+      # Use #{q:window_name} to escape '#' in window/pane titles so tmux doesn't
+      # interpret them as format variables (which caused color inversion)
+      set -g window-status-format '#[fg=#b0b0b0,bg=#000000,nobold,noreverse,noitalics]#{window_index}:#{q:window_name}'
+      set -g window-status-current-format '#[fg=#ffffff,bg=#000000,bold,noreverse,noitalics]#{window_index}:#{q:window_name}'
+
       # -----------------------------------------------------------------------
-      # Pane Border Colors & Titles
+      # Pane Border Colors
       # -----------------------------------------------------------------------
       set -g pane-border-style 'fg=#50585d'                 # Inactive pane border (comment gray)
       set -g pane-active-border-style 'fg=#8ebeec'          # Active pane border (info blue)
-
-      # Pane border titles configuration
-      set -g pane-border-status bottom                      # Show pane titles at bottom
-      set -g pane-border-lines heavy                        # Use heavy border style
-
-      # Explicitly set the style for pane border format text to prevent '#' interpretation issues
-      # The #[...] at the start sets explicit colors, preventing tmux from treating trailing '#'
-      # in pane titles as format variables (which causes color inversion)
-      setw -g pane-border-format '#[fg=#b0b0b0,bg=#000000] #{pane_index} #{pane_title} '
 
       # -----------------------------------------------------------------------
       # Message & Command Line Colors
@@ -730,7 +740,7 @@
       # -----------------------------------------------------------------------
       # General Settings
       # -----------------------------------------------------------------------
-      modifier = "Mod4";  # Super/Windows key
+      modifier = "Mod4"; # Super/Windows key
       terminal = "ghostty";
       menu = "tofi-run | xargs swaymsg exec --";
 
@@ -761,108 +771,118 @@
         # NOTE: Enabled as systemd service via `services.mako`
         # { command = "mako"; }
         # wob: Wayland Overlay Bar for volume/brightness feedback
-        { command = "rm -f $XDG_RUNTIME_DIR/wob.sock && mkfifo $XDG_RUNTIME_DIR/wob.sock && tail -f $XDG_RUNTIME_DIR/wob.sock | wob"; }
+        {
+          command = "rm -f $XDG_RUNTIME_DIR/wob.sock && mkfifo $XDG_RUNTIME_DIR/wob.sock && tail -f $XDG_RUNTIME_DIR/wob.sock | wob";
+        }
       ];
 
       # -----------------------------------------------------------------------
       # Key Bindings
       # -----------------------------------------------------------------------
-      keybindings = let
-        mod = config.wayland.windowManager.sway.config.modifier;
-      in {
-        # Basic
-        "${mod}+Return" = "exec ${pkgs.ghostty}/bin/ghostty +new-window";
-        # "${mod}+Return" = "exec ${pkgs.alacritty}/bin/alacritty";
-        "${mod}+Control+Return" = "exec vivaldi";
-        "${mod}+q" = "kill";
-        "${mod}+d" = "exec ${pkgs.tofi}/bin/tofi-run | xargs swaymsg exec --";
-        "${mod}+Control+d" = "exec ${pkgs.tofi}/bin/tofi-drun | xargs swaymsg exec --";
-        "${mod}+Control+r" = "reload";
-        "${mod}+Control+e" = "exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'";
+      keybindings =
+        let
+          mod = config.wayland.windowManager.sway.config.modifier;
+        in
+        {
+          # Basic
+          "${mod}+Return" = "exec ${pkgs.ghostty}/bin/ghostty +new-window";
+          # "${mod}+Return" = "exec ${pkgs.alacritty}/bin/alacritty";
+          "${mod}+Control+Return" = "exec vivaldi";
+          "${mod}+q" = "kill";
+          "${mod}+d" = "exec ${pkgs.tofi}/bin/tofi-run | xargs swaymsg exec --";
+          "${mod}+Control+d" = "exec ${pkgs.tofi}/bin/tofi-drun | xargs swaymsg exec --";
+          "${mod}+Control+r" = "reload";
+          "${mod}+Control+e" =
+            "exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'";
 
-        # Lock screen (Shift+l since mod+l is used for vim-style focus right)
-        "${mod}+Shift+l" = "exec ${pkgs.swaylock}/bin/swaylock -f";
+          # Lock screen (Shift+l since mod+l is used for vim-style focus right)
+          "${mod}+Shift+l" = "exec ${pkgs.swaylock}/bin/swaylock -f";
 
-        # Screenshots
-        "Print" = "exec ${pkgs.grim}/bin/grim";  # Save screenshot
-        "Shift+Print" = "exec ${pkgs.grim}/bin/grim - | ${pkgs.wl-clipboard}/bin/wl-copy";  # To clipboard
+          # Screenshots
+          "Print" = "exec ${pkgs.grim}/bin/grim"; # Save screenshot
+          "Shift+Print" = "exec ${pkgs.grim}/bin/grim - | ${pkgs.wl-clipboard}/bin/wl-copy"; # To clipboard
 
-        # Focus navigation (vim keys)
-        "${mod}+h" = "focus left";
-        "${mod}+j" = "focus down";
-        "${mod}+k" = "focus up";
-        "${mod}+l" = "focus right";
-        # Focus navigation (arrow keys)
-        "${mod}+Left" = "focus left";
-        "${mod}+Down" = "focus down";
-        "${mod}+Up" = "focus up";
-        "${mod}+Right" = "focus right";
+          # Focus navigation (vim keys)
+          "${mod}+h" = "focus left";
+          "${mod}+j" = "focus down";
+          "${mod}+k" = "focus up";
+          "${mod}+l" = "focus right";
+          # Focus navigation (arrow keys)
+          "${mod}+Left" = "focus left";
+          "${mod}+Down" = "focus down";
+          "${mod}+Up" = "focus up";
+          "${mod}+Right" = "focus right";
 
-        # Move windows (vim keys)
-        "${mod}+Control+h" = "move left";
-        "${mod}+Control+j" = "move down";
-        "${mod}+Control+k" = "move up";
-        "${mod}+Control+l" = "move right";
-        # Move windows (arrow keys)
-        "${mod}+Control+Left" = "move left";
-        "${mod}+Control+Down" = "move down";
-        "${mod}+Control+Up" = "move up";
-        "${mod}+Control+Right" = "move right";
+          # Move windows (vim keys)
+          "${mod}+Control+h" = "move left";
+          "${mod}+Control+j" = "move down";
+          "${mod}+Control+k" = "move up";
+          "${mod}+Control+l" = "move right";
+          # Move windows (arrow keys)
+          "${mod}+Control+Left" = "move left";
+          "${mod}+Control+Down" = "move down";
+          "${mod}+Control+Up" = "move up";
+          "${mod}+Control+Right" = "move right";
 
-        # Workspaces
-        "${mod}+1" = "workspace number 1";
-        "${mod}+2" = "workspace number 2";
-        "${mod}+3" = "workspace number 3";
-        "${mod}+4" = "workspace number 4";
-        "${mod}+5" = "workspace number 5";
-        "${mod}+6" = "workspace number 6";
-        "${mod}+7" = "workspace number 7";
-        "${mod}+8" = "workspace number 8";
-        "${mod}+9" = "workspace number 9";
-        "${mod}+0" = "workspace number 10";
+          # Workspaces
+          "${mod}+1" = "workspace number 1";
+          "${mod}+2" = "workspace number 2";
+          "${mod}+3" = "workspace number 3";
+          "${mod}+4" = "workspace number 4";
+          "${mod}+5" = "workspace number 5";
+          "${mod}+6" = "workspace number 6";
+          "${mod}+7" = "workspace number 7";
+          "${mod}+8" = "workspace number 8";
+          "${mod}+9" = "workspace number 9";
+          "${mod}+0" = "workspace number 10";
 
-        # Move container to workspace
-        "${mod}+Control+1" = "move container to workspace number 1";
-        "${mod}+Control+2" = "move container to workspace number 2";
-        "${mod}+Control+3" = "move container to workspace number 3";
-        "${mod}+Control+4" = "move container to workspace number 4";
-        "${mod}+Control+5" = "move container to workspace number 5";
-        "${mod}+Control+6" = "move container to workspace number 6";
-        "${mod}+Control+7" = "move container to workspace number 7";
-        "${mod}+Control+8" = "move container to workspace number 8";
-        "${mod}+Control+9" = "move container to workspace number 9";
-        "${mod}+Control+0" = "move container to workspace number 10";
+          # Move container to workspace
+          "${mod}+Control+1" = "move container to workspace number 1";
+          "${mod}+Control+2" = "move container to workspace number 2";
+          "${mod}+Control+3" = "move container to workspace number 3";
+          "${mod}+Control+4" = "move container to workspace number 4";
+          "${mod}+Control+5" = "move container to workspace number 5";
+          "${mod}+Control+6" = "move container to workspace number 6";
+          "${mod}+Control+7" = "move container to workspace number 7";
+          "${mod}+Control+8" = "move container to workspace number 8";
+          "${mod}+Control+9" = "move container to workspace number 9";
+          "${mod}+Control+0" = "move container to workspace number 10";
 
-        # Layout
-        "${mod}+b" = "splith";
-        "${mod}+v" = "splitv";
-        "${mod}+s" = "layout stacking";
-        "${mod}+w" = "layout tabbed";
-        "${mod}+e" = "layout toggle split";
-        "${mod}+m" = "fullscreen";
-        "${mod}+Control+space" = "floating toggle";
-        "${mod}+space" = "focus mode_toggle";
-        "${mod}+a" = "focus parent";
+          # Layout
+          "${mod}+b" = "splith";
+          "${mod}+v" = "splitv";
+          "${mod}+s" = "layout stacking";
+          "${mod}+w" = "layout tabbed";
+          "${mod}+e" = "layout toggle split";
+          "${mod}+m" = "fullscreen";
+          "${mod}+Control+space" = "floating toggle";
+          "${mod}+space" = "focus mode_toggle";
+          "${mod}+a" = "focus parent";
 
-        # Scratchpad
-        "${mod}+Control+minus" = "move scratchpad";
-        "${mod}+minus" = "scratchpad show";
+          # Scratchpad
+          "${mod}+Control+minus" = "move scratchpad";
+          "${mod}+minus" = "scratchpad show";
 
-        # Resize mode
-        "${mod}+r" = "mode resize";
+          # Resize mode
+          "${mod}+r" = "mode resize";
 
-        # Allsink mode (utilities)
-        "${mod}+z" = "mode allsink";
+          # Allsink mode (utilities)
+          "${mod}+z" = "mode allsink";
 
-        # Audio (with wob overlay feedback)
-        "--locked XF86AudioMute" = "exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle && (wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep -q MUTED && echo 0 > $XDG_RUNTIME_DIR/wob.sock) || wpctl get-volume @DEFAULT_AUDIO_SINK@ | sed 's/[^0-9]//g' > $XDG_RUNTIME_DIR/wob.sock";
-        "--locked XF86AudioLowerVolume" = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%- && wpctl get-volume @DEFAULT_AUDIO_SINK@ | sed 's/[^0-9]//g' > $XDG_RUNTIME_DIR/wob.sock";
-        "--locked XF86AudioRaiseVolume" = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+ && wpctl get-volume @DEFAULT_AUDIO_SINK@ | sed 's/[^0-9]//g' > $XDG_RUNTIME_DIR/wob.sock";
+          # Audio (with wob overlay feedback)
+          "--locked XF86AudioMute" =
+            "exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle && (wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep -q MUTED && echo 0 > $XDG_RUNTIME_DIR/wob.sock) || wpctl get-volume @DEFAULT_AUDIO_SINK@ | sed 's/[^0-9]//g' > $XDG_RUNTIME_DIR/wob.sock";
+          "--locked XF86AudioLowerVolume" =
+            "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%- && wpctl get-volume @DEFAULT_AUDIO_SINK@ | sed 's/[^0-9]//g' > $XDG_RUNTIME_DIR/wob.sock";
+          "--locked XF86AudioRaiseVolume" =
+            "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+ && wpctl get-volume @DEFAULT_AUDIO_SINK@ | sed 's/[^0-9]//g' > $XDG_RUNTIME_DIR/wob.sock";
 
-        # Brightness (with wob overlay feedback)
-        "--locked XF86MonBrightnessDown" = "exec brightnessctl set 5%- | sed -En 's/.*\\(([0-9]+)%\\).*/\\1/p' > $XDG_RUNTIME_DIR/wob.sock";
-        "--locked XF86MonBrightnessUp" = "exec brightnessctl set 5%+ | sed -En 's/.*\\(([0-9]+)%\\).*/\\1/p' > $XDG_RUNTIME_DIR/wob.sock";
-      };
+          # Brightness (with wob overlay feedback)
+          "--locked XF86MonBrightnessDown" =
+            "exec brightnessctl set 5%- | sed -En 's/.*\\(([0-9]+)%\\).*/\\1/p' > $XDG_RUNTIME_DIR/wob.sock";
+          "--locked XF86MonBrightnessUp" =
+            "exec brightnessctl set 5%+ | sed -En 's/.*\\(([0-9]+)%\\).*/\\1/p' > $XDG_RUNTIME_DIR/wob.sock";
+        };
 
       modes = {
         resize = {
@@ -885,7 +905,8 @@
           # p = color picker
           "p" = "exec wl-color-picker clipboard; mode default";
           # s = screenshot region to clipboard
-          "s" = "exec ${pkgs.slurp}/bin/slurp | ${pkgs.grim}/bin/grim -g - - | ${pkgs.wl-clipboard}/bin/wl-copy; mode default";
+          "s" =
+            "exec ${pkgs.slurp}/bin/slurp | ${pkgs.grim}/bin/grim -g - - | ${pkgs.wl-clipboard}/bin/wl-copy; mode default";
           # Exit
           "Return" = "mode default";
           "Escape" = "mode default";
@@ -914,7 +935,7 @@
         "type:touchpad" = {
           tap = "enabled";
           natural_scroll = "enabled";
-          dwt = "enabled";  # Disable while typing
+          dwt = "enabled"; # Disable while typing
           middle_emulation = "enabled";
         };
       };
@@ -953,12 +974,16 @@
         commands = [
           {
             # Prevent screen from going idle when any app is fullscreen
-            criteria = { app_id = "^.*"; };
+            criteria = {
+              app_id = "^.*";
+            };
             command = "inhibit_idle fullscreen";
           }
           {
             # Float pavucontrol
-            criteria = { app_id = "pavucontrol"; };
+            criteria = {
+              app_id = "pavucontrol";
+            };
             command = "floating enable";
           }
         ];
@@ -967,31 +992,40 @@
       # -----------------------------------------------------------------------
       # Bar
       # -----------------------------------------------------------------------
-      bars = [{
-        command = "waybar";
-        position = "top";
-      }];
+      bars = [
+        {
+          command = "waybar";
+          position = "top";
+        }
+      ];
     };
 
     extraConfig = ''
       # Host-specific output configuration
-      ${if hostname == "main" then ''
-        output eDP-1 {
-          mode 1920x1080@144Hz
-          pos 1920 0
-          adaptive_sync off
-          max_render_time off
-          allow_tearing yes
-        }
-      '' else if hostname == "secondary" then ''
-        output eDP-1 {
-          mode 1366x768@60Hz
-          pos 1920 0
-          adaptive_sync off
-          max_render_time off
-          allow_tearing yes
-        }
-      '' else ""}
+      ${
+        if hostname == "main" then
+          ''
+            output eDP-1 {
+              mode 1920x1080@144Hz
+              pos 1920 0
+              adaptive_sync off
+              max_render_time off
+              allow_tearing yes
+            }
+          ''
+        else if hostname == "secondary" then
+          ''
+            output eDP-1 {
+              mode 1366x768@60Hz
+              pos 1920 0
+              adaptive_sync off
+              max_render_time off
+              allow_tearing yes
+            }
+          ''
+        else
+          ""
+      }
 
       # Include system config
       include /etc/sway/config.d/*
@@ -1165,9 +1199,15 @@
       };
 
       window = {
-        dimensions = { columns = 0; lines = 0; };
+        dimensions = {
+          columns = 0;
+          lines = 0;
+        };
         position = "None";
-        padding = { x = 6; y = 6; };
+        padding = {
+          x = 6;
+          y = 6;
+        };
         dynamic_padding = false;
         decorations = "Full";
         opacity = 1.0;
@@ -1185,12 +1225,27 @@
       };
 
       font = {
-        normal = { family = "AporeticSerifMonoNerdFont"; style = "Regular"; };
-        bold = { family = "AporeticSerifMonoNerdFont"; style = "Bold"; };
-        italic = { family = "AporeticSerifMonoNerdFont"; style = "Italic"; };
-        bold_italic = { family = "AporeticSerifMonoNerdFont"; style = "Bold Italic"; };
+        normal = {
+          family = "AporeticSerifMonoNerdFont";
+          style = "Regular";
+        };
+        bold = {
+          family = "AporeticSerifMonoNerdFont";
+          style = "Bold";
+        };
+        italic = {
+          family = "AporeticSerifMonoNerdFont";
+          style = "Italic";
+        };
+        bold_italic = {
+          family = "AporeticSerifMonoNerdFont";
+          style = "Bold Italic";
+        };
         size = 16;
-        offset = { x = 0; y = 0; };
+        offset = {
+          x = 0;
+          y = 0;
+        };
         builtin_box_drawing = true;
       };
 
@@ -1242,7 +1297,10 @@
       };
 
       cursor = {
-        style = { shape = "Block"; blinking = "Off"; };
+        style = {
+          shape = "Block";
+          blinking = "Off";
+        };
         vi_mode_style = "None";
         blink_interval = 750;
         blink_timeout = 3;
@@ -1300,7 +1358,7 @@
       # -----------------------------------------------------------------------
       font-family = "AporeticSerifMonoNerdFont";
       font-size = 16;
-      font-feature = "-calt";  # Disable ligatures
+      font-feature = "-calt"; # Disable ligatures
 
       # -----------------------------------------------------------------------
       # Window Settings
@@ -1312,6 +1370,7 @@
       window-padding-color = "background";
       window-theme = "ghostty";
       window-save-state = "always";
+      unfocused-split-opacity = 1;
 
       # -----------------------------------------------------------------------
       # Cursor
@@ -1325,8 +1384,8 @@
       # Terminal Features
       # -----------------------------------------------------------------------
       shell-integration = "zsh";
-      shell-integration-features = "cursor,sudo,title,ssh-env,ssh-teminfo";
-      command = "zsh";
+      shell-integration-features = "no-cursor,sudo,title,ssh-env,ssh-terminfo";
+      # command is unset - Ghostty uses $SHELL automatically, which is correct on NixOS
       # Send notifications if the surface that the command is running in is not focused
       notify-on-command-finish = "unfocused";
       notify-on-command-finish-action = "no-bell,notify";
@@ -1357,13 +1416,7 @@
       # Shaders
       # -----------------------------------------------------------------------
       custom-shader = "shaders/cursor.glsl";
-      custom-shader-animation = true;
-
-      # -----------------------------------------------------------------------
-      # Bell
-      # -----------------------------------------------------------------------
-      audible-bell = false;
-      visual-bell = "false";
+      custom-shader-animation = "always";
 
       # -----------------------------------------------------------------------
       # GTK
@@ -1376,8 +1429,56 @@
       # -----------------------------------------------------------------------
       # Key Bindings
       # -----------------------------------------------------------------------
-      # Shift+Enter for newline (matching Alacritty config)
-      keybind = "shift+enter=text:\x1b\r";
+      keybind = [
+        # Shift+Enter for newline
+        "shift+enter=text:\x1b\r"
+
+        # Pass ctrl+a through to the shell when pressed twice (readline: go to line start)
+        "ctrl+a>ctrl+a=text:\x01"
+
+        # -----------------------------------------------------------------------
+        # Split management (ctrl+a leader)
+        # -----------------------------------------------------------------------
+        "ctrl+a>shift+backslash=new_split:right"   # | → split right
+        "ctrl+a>minus=new_split:down"               # - → split down
+        "ctrl+a>x=close_surface"                    # x → close pane
+        "ctrl+a>z=toggle_split_zoom"                # z → zoom pane
+        "ctrl+a>e=equalize_splits"                  # e → equalize splits
+
+        # -----------------------------------------------------------------------
+        # Split navigation (ctrl+a leader, vim-style)
+        # -----------------------------------------------------------------------
+        "ctrl+a>h=goto_split:left"
+        "ctrl+a>j=goto_split:bottom"
+        "ctrl+a>k=goto_split:top"
+        "ctrl+a>l=goto_split:right"
+
+        # -----------------------------------------------------------------------
+        # Split resizing (ctrl+a leader, shift+hjkl)
+        # -----------------------------------------------------------------------
+        "ctrl+a>shift+h=resize_split:left,40"
+        "ctrl+a>shift+j=resize_split:down,40"
+        "ctrl+a>shift+k=resize_split:up,40"
+        "ctrl+a>shift+l=resize_split:right,40"
+
+        # -----------------------------------------------------------------------
+        # Tab management
+        # -----------------------------------------------------------------------
+        "ctrl+a>c=new_tab"                          # c → new tab
+        "alt+h=previous_tab"                        # Alt+h → previous tab
+        "alt+l=next_tab"                            # Alt+l → next tab
+
+        # Go to tab by number
+        "ctrl+a>one=goto_tab:1"
+        "ctrl+a>two=goto_tab:2"
+        "ctrl+a>three=goto_tab:3"
+        "ctrl+a>four=goto_tab:4"
+        "ctrl+a>five=goto_tab:5"
+        "ctrl+a>six=goto_tab:6"
+        "ctrl+a>seven=goto_tab:7"
+        "ctrl+a>eight=goto_tab:8"
+        "ctrl+a>nine=goto_tab:9"
+      ];
 
       # -----------------------------------------------------------------------
       # Quitting
@@ -1448,8 +1549,10 @@
     };
   };
 
+  # neovim is configured system-wide in configuration.nix (programs.neovim)
+
   # ===========================================================================
-  # HELIX (Text Editor)
+  # HELIX
   # ===========================================================================
   programs.helix = {
     enable = true;
@@ -1465,16 +1568,35 @@
         auto-completion = true;
         path-completion = true;
         auto-format = true;
-        rulers = [ 80 120 ];
+        rulers = [
+          80
+          120
+        ];
         color-modes = true;
         trim-trailing-whitespace = true;
         popup-border = "all";
         auto-pairs = false;
 
         statusline = {
-          left = [ "mode" "spinner" "version-control" "spacer" "diagnostics" ];
-          center = [ "file-name" "read-only-indicator" "file-modification-indicator" ];
-          right = [ "file-encoding" "file-type" "total-line-numbers" "position" "register" ];
+          left = [
+            "mode"
+            "spinner"
+            "version-control"
+            "spacer"
+            "diagnostics"
+          ];
+          center = [
+            "file-name"
+            "read-only-indicator"
+            "file-modification-indicator"
+          ];
+          right = [
+            "file-encoding"
+            "file-type"
+            "total-line-numbers"
+            "position"
+            "register"
+          ];
         };
 
         lsp = {
@@ -1495,16 +1617,18 @@
         command = "iwes";
       };
 
-      language = [{
-        name = "markdown";
-        language-servers = [ "iwe" ];
-        auto-format = true;
-        soft-wrap = {
-          enable = true;
-          wrap-at-text-width = true;
-        };
-        text-width = 120;
-      }];
+      language = [
+        {
+          name = "markdown";
+          language-servers = [ "iwe" ];
+          auto-format = true;
+          soft-wrap = {
+            enable = true;
+            wrap-at-text-width = true;
+          };
+          text-width = 120;
+        }
+      ];
     };
 
     themes.koda = {
@@ -1539,7 +1663,10 @@
       type = "keyword";
       "type.builtin" = "keyword";
       constructor = "fg";
-      function = { fg = "func"; modifiers = [ "bold" ]; };
+      function = {
+        fg = "func";
+        modifiers = [ "bold" ];
+      };
       "function.builtin" = "func";
       "function.method" = "func";
       "function.macro" = "const";
@@ -1555,16 +1682,41 @@
       string = "string";
       "string.regexp" = "string";
       "string.special" = "fg";
-      "string.special.url" = { fg = "fg"; underline = { style = "line"; }; };
+      "string.special.url" = {
+        fg = "fg";
+        underline = {
+          style = "line";
+        };
+      };
       "constant.numeric" = "const";
       label = "keyword";
 
-      "markup.heading" = { fg = "emphasis"; modifiers = [ "bold" ]; };
-      "markup.bold" = { modifiers = [ "bold" ]; };
-      "markup.italic" = { modifiers = [ "italic" ]; };
-      "markup.strikethrough" = { fg = "danger"; modifiers = [ "crossed_out" ]; };
-      "markup.link" = { fg = "emphasis"; underline = { style = "line"; }; };
-      "markup.link.url" = { fg = "info"; underline = { style = "line"; }; };
+      "markup.heading" = {
+        fg = "emphasis";
+        modifiers = [ "bold" ];
+      };
+      "markup.bold" = {
+        modifiers = [ "bold" ];
+      };
+      "markup.italic" = {
+        modifiers = [ "italic" ];
+      };
+      "markup.strikethrough" = {
+        fg = "danger";
+        modifiers = [ "crossed_out" ];
+      };
+      "markup.link" = {
+        fg = "emphasis";
+        underline = {
+          style = "line";
+        };
+      };
+      "markup.link.url" = {
+        fg = "info";
+        underline = {
+          style = "line";
+        };
+      };
       "markup.link.text" = "emphasis";
       "markup.raw" = "const";
       "markup.raw.block" = "const";
@@ -1577,61 +1729,192 @@
       "diff.minus" = "danger";
       "diff.delta" = "warning";
 
-      "ui.background" = { bg = "bg"; };
-      "ui.background.separator" = { fg = "comment"; };
-      "ui.linenr" = { fg = "comment"; };
-      "ui.linenr.selected" = { fg = "emphasis"; modifiers = [ "bold" ]; };
-      "ui.statusline" = { fg = "fg"; bg = "bg"; };
-      "ui.statusline.inactive" = { fg = "comment"; bg = "bg"; };
-      "ui.statusline.normal" = { fg = "bg"; bg = "info"; };
-      "ui.statusline.insert" = { fg = "bg"; bg = "green"; };
-      "ui.statusline.select" = { fg = "bg"; bg = "warning"; };
-      "ui.popup" = { bg = "bg"; };
-      "ui.window" = { fg = "border"; };
-      "ui.help" = { fg = "fg"; bg = "line"; };
-      "ui.text" = { fg = "fg"; };
-      "ui.text.focus" = { fg = "emphasis"; };
+      "ui.background" = {
+        bg = "bg";
+      };
+      "ui.background.separator" = {
+        fg = "comment";
+      };
+      "ui.linenr" = {
+        fg = "comment";
+      };
+      "ui.linenr.selected" = {
+        fg = "emphasis";
+        modifiers = [ "bold" ];
+      };
+      "ui.statusline" = {
+        fg = "fg";
+        bg = "bg";
+      };
+      "ui.statusline.inactive" = {
+        fg = "comment";
+        bg = "bg";
+      };
+      "ui.statusline.normal" = {
+        fg = "bg";
+        bg = "info";
+      };
+      "ui.statusline.insert" = {
+        fg = "bg";
+        bg = "green";
+      };
+      "ui.statusline.select" = {
+        fg = "bg";
+        bg = "warning";
+      };
+      "ui.popup" = {
+        bg = "bg";
+      };
+      "ui.window" = {
+        fg = "border";
+      };
+      "ui.help" = {
+        fg = "fg";
+        bg = "line";
+      };
+      "ui.text" = {
+        fg = "fg";
+      };
+      "ui.text.focus" = {
+        fg = "emphasis";
+      };
       "ui.text.inactive" = "comment";
-      "ui.text.directory" = { fg = "info"; };
-      "ui.virtual" = { fg = "comment"; };
-      "ui.virtual.ruler" = { bg = "line"; };
-      "ui.virtual.jump-label" = { fg = "highlight"; modifiers = [ "bold" ]; };
-      "ui.virtual.indent-guide" = { fg = "line"; };
-      "ui.virtual.inlay-hint" = { fg = "comment"; };
-      "ui.virtual.whitespace" = { fg = "line"; };
-      "ui.virtual.wrap" = { fg = "emphasis"; };
+      "ui.text.directory" = {
+        fg = "info";
+      };
+      "ui.virtual" = {
+        fg = "comment";
+      };
+      "ui.virtual.ruler" = {
+        bg = "line";
+      };
+      "ui.virtual.jump-label" = {
+        fg = "highlight";
+        modifiers = [ "bold" ];
+      };
+      "ui.virtual.indent-guide" = {
+        fg = "line";
+      };
+      "ui.virtual.inlay-hint" = {
+        fg = "comment";
+      };
+      "ui.virtual.whitespace" = {
+        fg = "line";
+      };
+      "ui.virtual.wrap" = {
+        fg = "emphasis";
+      };
 
-      "ui.selection" = { bg = "line"; };
-      "ui.selection.primary" = { bg = "line"; };
-      "ui.cursor" = { modifiers = [ "reversed" ]; };
-      "ui.cursor.select" = { bg = "highlight"; };
-      "ui.cursor.insert" = { bg = "emphasis"; };
-      "ui.cursor.primary" = { modifiers = [ "reversed" ]; };
-      "ui.cursor.primary.select" = { modifiers = [ "reversed" ]; };
-      "ui.cursor.primary.insert" = { modifiers = [ "reversed" ]; };
-      "ui.cursor.match" = { fg = "emphasis"; underline = { style = "line"; }; };
-      "ui.cursorline.primary" = { bg = "line"; };
-      "ui.cursorcolumn.primary" = { bg = "line"; };
-      "ui.highlight" = { bg = "line"; };
-      "ui.highlight.frameline" = { bg = "line"; };
-      "ui.debug" = { fg = "warning"; };
-      "ui.debug.breakpoint" = { fg = "danger"; };
-      "ui.menu" = { fg = "fg"; bg = "bg"; };
-      "ui.menu.selected" = { fg = "bg"; bg = "emphasis"; modifiers = [ "bold" ]; };
-      "ui.menu.scroll" = { fg = "fg"; bg = "comment"; };
-      "ui.gutter" = { bg = "bg"; };
-      "ui.gutter.selected" = { bg = "line"; };
+      "ui.selection" = {
+        bg = "line";
+      };
+      "ui.selection.primary" = {
+        bg = "line";
+      };
+      "ui.cursor" = {
+        modifiers = [ "reversed" ];
+      };
+      "ui.cursor.select" = {
+        bg = "highlight";
+      };
+      "ui.cursor.insert" = {
+        bg = "emphasis";
+      };
+      "ui.cursor.primary" = {
+        modifiers = [ "reversed" ];
+      };
+      "ui.cursor.primary.select" = {
+        modifiers = [ "reversed" ];
+      };
+      "ui.cursor.primary.insert" = {
+        modifiers = [ "reversed" ];
+      };
+      "ui.cursor.match" = {
+        fg = "emphasis";
+        underline = {
+          style = "line";
+        };
+      };
+      "ui.cursorline.primary" = {
+        bg = "line";
+      };
+      "ui.cursorcolumn.primary" = {
+        bg = "line";
+      };
+      "ui.highlight" = {
+        bg = "line";
+      };
+      "ui.highlight.frameline" = {
+        bg = "line";
+      };
+      "ui.debug" = {
+        fg = "warning";
+      };
+      "ui.debug.breakpoint" = {
+        fg = "danger";
+      };
+      "ui.menu" = {
+        fg = "fg";
+        bg = "bg";
+      };
+      "ui.menu.selected" = {
+        fg = "bg";
+        bg = "emphasis";
+        modifiers = [ "bold" ];
+      };
+      "ui.menu.scroll" = {
+        fg = "fg";
+        bg = "comment";
+      };
+      "ui.gutter" = {
+        bg = "bg";
+      };
+      "ui.gutter.selected" = {
+        bg = "line";
+      };
 
-      "ui.bufferline" = { fg = "comment"; bg = "bg"; };
-      "ui.bufferline.active" = { fg = "emphasis"; bg = "line"; };
-      "ui.bufferline.background" = { bg = "bg"; };
+      "ui.bufferline" = {
+        fg = "comment";
+        bg = "bg";
+      };
+      "ui.bufferline.active" = {
+        fg = "emphasis";
+        bg = "line";
+      };
+      "ui.bufferline.background" = {
+        bg = "bg";
+      };
 
-      "diagnostic.hint" = { underline = { color = "info"; style = "curl"; }; };
-      "diagnostic.info" = { underline = { color = "fg"; style = "curl"; }; };
-      "diagnostic.warning" = { underline = { color = "warning"; style = "curl"; }; };
-      "diagnostic.error" = { underline = { color = "danger"; style = "curl"; }; };
-      "diagnostic.unnecessary" = { modifiers = [ "dim" ]; };
-      "diagnostic.deprecated" = { modifiers = [ "crossed_out" ]; };
+      "diagnostic.hint" = {
+        underline = {
+          color = "info";
+          style = "curl";
+        };
+      };
+      "diagnostic.info" = {
+        underline = {
+          color = "fg";
+          style = "curl";
+        };
+      };
+      "diagnostic.warning" = {
+        underline = {
+          color = "warning";
+          style = "curl";
+        };
+      };
+      "diagnostic.error" = {
+        underline = {
+          color = "danger";
+          style = "curl";
+        };
+      };
+      "diagnostic.unnecessary" = {
+        modifiers = [ "dim" ];
+      };
+      "diagnostic.deprecated" = {
+        modifiers = [ "crossed_out" ];
+      };
 
       warning = "warning";
       error = "danger";
@@ -1679,16 +1962,16 @@
       borderRadius = 0;
       borderSize = 2;
 
-      font = "AporeticSerifMonoNerdFont 11";  # System font
+      font = "AporeticSerifMonoNerdFont 11"; # System font
 
-      defaultTimeout = 5000;           # Auto-dismiss after 5 seconds
-      ignoreTimeout = 0;               # Don't ignore app-requested timeouts
+      defaultTimeout = 5000; # Auto-dismiss after 5 seconds
+      ignoreTimeout = 0; # Don't ignore app-requested timeouts
 
-      width = 300;                     # Notification width in pixels
-      height = 100;                    # Max notification height
-      margin = "10";                   # Margin from screen edge
-      padding = "10";                  # Internal padding
-      anchor = "top-right";            # Where notifications appear (top-right, bottom-left, etc.)
+      width = 300; # Notification width in pixels
+      height = 100; # Max notification height
+      margin = "10"; # Margin from screen edge
+      padding = "10"; # Internal padding
+      anchor = "top-right"; # Where notifications appear (top-right, bottom-left, etc.)
 
       icons = 1;
       maxIconSize = 48;
@@ -1717,19 +2000,19 @@
     '';
   };
 
-# =============================================================================
-# SWAYIDLE (Idle Management)
-# =============================================================================
-# Idle daemon for Wayland - handles screen locking and DPMS
+  # =============================================================================
+  # SWAYIDLE (Idle Management)
+  # =============================================================================
+  # Idle daemon for Wayland - handles screen locking and DPMS
   services.swayidle = {
     enable = true;
     timeouts = [
       {
-        timeout = 600;  # 10 minutes
+        timeout = 600; # 10 minutes
         command = "${pkgs.swaylock}/bin/swaylock -f";
       }
       {
-        timeout = 1800;  # 30 minutes
+        timeout = 1800; # 30 minutes
         command = "${pkgs.sway}/bin/swaymsg 'output * dpms off'";
         resumeCommand = "${pkgs.sway}/bin/swaymsg 'output * dpms on'";
       }
@@ -1747,35 +2030,35 @@
       # -------------------------------------------------------------------------
       # Colors - matching system color scheme
       # -------------------------------------------------------------------------
-      color = "000000";                    # Background color (black)
+      color = "000000"; # Background color (black)
 
       # Text colors
-      text-color = "b0b0b0";               # Default text (light gray)
-      text-clear-color = "b0b0b0";         # Text when cleared
-      text-caps-lock-color = "d9ba73";     # Text when caps lock is on (yellow warning)
-      text-ver-color = "ffffff";           # Text during verification (white)
-      text-wrong-color = "ff7676";         # Text when password is wrong (red)
+      text-color = "b0b0b0"; # Default text (light gray)
+      text-clear-color = "b0b0b0"; # Text when cleared
+      text-caps-lock-color = "d9ba73"; # Text when caps lock is on (yellow warning)
+      text-ver-color = "ffffff"; # Text during verification (white)
+      text-wrong-color = "ff7676"; # Text when password is wrong (red)
 
       # Ring (outer circle) colors
-      ring-color = "777777";               # Default ring (keyword gray)
-      ring-clear-color = "8a9a7b";         # Ring when cleared (green)
-      ring-caps-lock-color = "d9ba73";     # Ring when caps lock is on (yellow)
-      ring-ver-color = "8ebeec";           # Ring during verification (blue)
-      ring-wrong-color = "ff7676";         # Ring when password is wrong (red)
+      ring-color = "777777"; # Default ring (keyword gray)
+      ring-clear-color = "8a9a7b"; # Ring when cleared (green)
+      ring-caps-lock-color = "d9ba73"; # Ring when caps lock is on (yellow)
+      ring-ver-color = "8ebeec"; # Ring during verification (blue)
+      ring-wrong-color = "ff7676"; # Ring when password is wrong (red)
 
       # Inside (inner circle) colors
-      inside-color = "000000";             # Default inside (black)
-      inside-clear-color = "000000";       # Inside when cleared
-      inside-caps-lock-color = "000000";   # Inside when caps lock is on
-      inside-ver-color = "000000";         # Inside during verification
-      inside-wrong-color = "000000";       # Inside when password is wrong
+      inside-color = "000000"; # Default inside (black)
+      inside-clear-color = "000000"; # Inside when cleared
+      inside-caps-lock-color = "000000"; # Inside when caps lock is on
+      inside-ver-color = "000000"; # Inside during verification
+      inside-wrong-color = "000000"; # Inside when password is wrong
 
       # Key highlight colors
-      key-hl-color = "8a9a7b";             # Key press highlight (green)
-      bs-hl-color = "ff7676";              # Backspace highlight (red)
+      key-hl-color = "8a9a7b"; # Key press highlight (green)
+      bs-hl-color = "ff7676"; # Backspace highlight (red)
 
       # Separator line (between indicator and text)
-      line-color = "000000";               # Separator line color
+      line-color = "000000"; # Separator line color
       line-clear-color = "000000";
       line-caps-lock-color = "000000";
       line-ver-color = "000000";
@@ -1784,29 +2067,29 @@
       # -------------------------------------------------------------------------
       # Typography
       # -------------------------------------------------------------------------
-      font = "AporeticSerifMonoNerdFont";  # System font
-      font-size = 16;                      # Font size for text
+      font = "AporeticSerifMonoNerdFont"; # System font
+      font-size = 16; # Font size for text
 
       # -------------------------------------------------------------------------
       # Indicator appearance
       # -------------------------------------------------------------------------
-      indicator-radius = 100;              # Radius of the indicator circle
-      indicator-thickness = 10;            # Thickness of the ring
-      indicator-idle-visible = false;      # Hide indicator when idle (no input)
-      indicator-caps-lock = true;          # Show indicator when caps lock is on
+      indicator-radius = 100; # Radius of the indicator circle
+      indicator-thickness = 10; # Thickness of the ring
+      indicator-idle-visible = false; # Hide indicator when idle (no input)
+      indicator-caps-lock = true; # Show indicator when caps lock is on
 
       # -------------------------------------------------------------------------
       # Behavior
       # -------------------------------------------------------------------------
-      show-failed-attempts = true;         # Display number of failed login attempts
-      show-keyboard-layout = false;        # Show current keyboard layout
-      ignore-empty-password = true;        # Don't validate empty password submissions
-      daemonize = false;                   # Don't fork into background
+      show-failed-attempts = true; # Display number of failed login attempts
+      show-keyboard-layout = false; # Show current keyboard layout
+      ignore-empty-password = true; # Don't validate empty password submissions
+      daemonize = false; # Don't fork into background
 
       # -------------------------------------------------------------------------
       # Display
       # -------------------------------------------------------------------------
-      scaling = "fill";                    # How to scale images (stretch, fill, fit, center, tile)
+      scaling = "fill"; # How to scale images (stretch, fill, fit, center, tile)
       image = "${./wallpaper/landscape.jpg}"; # Path to background image
 
     };
@@ -1884,23 +2167,23 @@
       user.name = "Ilya Sergeev";
       user.email = "wesunnn2@gmail.com";
 
-      init.defaultBranch = "main";     # Default branch name for new repositories
+      init.defaultBranch = "main"; # Default branch name for new repositories
 
-      pull.rebase = true;              # Rebase local commits on top of pulled changes (cleaner history)
-      push.autoSetupRemote = true;     # Auto-create remote branch when pushing new local branches
-      push.default = "current";        # Push current branch to remote branch with same name
+      pull.rebase = true; # Rebase local commits on top of pulled changes (cleaner history)
+      push.autoSetupRemote = true; # Auto-create remote branch when pushing new local branches
+      push.default = "current"; # Push current branch to remote branch with same name
 
-      merge.conflictStyle = "zdiff3";  # Enhanced conflict markers showing base + both changes
-      rebase.autoStash = true;         # Auto-stash/unstash uncommitted changes during rebase
-      rebase.autoSquash = true;        # Auto-squash commits marked with 'fixup!' or 'squash!'
+      merge.conflictStyle = "zdiff3"; # Enhanced conflict markers showing base + both changes
+      rebase.autoStash = true; # Auto-stash/unstash uncommitted changes during rebase
+      rebase.autoSquash = true; # Auto-squash commits marked with 'fixup!' or 'squash!'
 
-      log.date = "iso";                      # Use ISO 8601 format (YYYY-MM-DD HH:MM:SS)
-      status.showUntrackedFiles = "all";     # Show individual untracked files, not just dirs
+      log.date = "iso"; # Use ISO 8601 format (YYYY-MM-DD HH:MM:SS)
+      status.showUntrackedFiles = "all"; # Show individual untracked files, not just dirs
 
-      diff.algorithm = "histogram";    # Better diff algorithm (faster, more readable than myers)
-      diff.colorMoved = "default";     # Highlight moved code blocks in different color
+      diff.algorithm = "histogram"; # Better diff algorithm (faster, more readable than myers)
+      diff.colorMoved = "default"; # Highlight moved code blocks in different color
 
-      commit.verbose = true;           # Show full diff in commit message editor
+      commit.verbose = true; # Show full diff in commit message editor
 
       pager = {
         branch = false;
@@ -1910,13 +2193,13 @@
       # -------------------------------------------------------------------------
       # GitLab Specific
       # -------------------------------------------------------------------------
-      gitlab.host = "gitlab.com";      # TODO: Change when switching to self-hosting
+      gitlab.host = "gitlab.com"; # TODO: Change when switching to self-hosting
 
       # -------------------------------------------------------------------------
       # Performance & Optimization
       # -------------------------------------------------------------------------
-      fetch.prune = true;              # Auto-remove deleted remote branches on fetch
-      fetch.pruneTags = true;          # Also prune deleted remote tags
+      fetch.prune = true; # Auto-remove deleted remote branches on fetch
+      fetch.pruneTags = true; # Also prune deleted remote tags
 
       # -------------------------------------------------------------------------
       # URL Rewriting
@@ -1942,8 +2225,8 @@
     enable = true;
 
     settings = {
-      git_protocol = "ssh";   # Use SSH for git operations (requires SSH key setup)
-      prompt = "enabled";     # Show interactive prompts for confirmations
+      git_protocol = "ssh"; # Use SSH for git operations (requires SSH key setup)
+      prompt = "enabled"; # Show interactive prompts for confirmations
       # editor = "";          # Editor for writing descriptions (defaults to $EDITOR)
       # pager = "";           # Pager for long output (defaults to $PAGER or less)
     };
@@ -1952,7 +2235,7 @@
     # Specify which user to use for github.com operations
     hosts = {
       "github.com" = {
-        user = "clayedcapo";  # Your GitHub username
+        user = "clayedcapo"; # Your GitHub username
         # git_protocol = "ssh";  # Can override global git_protocol per host
       };
     };
@@ -1976,13 +2259,13 @@
     enableJujutsuIntegration = true;
 
     options = {
-      diff-so-fancy = true;         # Use diff-so-fancy inspired style
-      line-numbers = true;          # Show line numbers in left margin
-      true-color = "always";        # Enable 24-bit true color support
+      diff-so-fancy = true; # Use diff-so-fancy inspired style
+      line-numbers = true; # Show line numbers in left margin
+      true-color = "always"; # Enable 24-bit true color support
 
-      navigate = true;              # Enable file navigation in pager
+      navigate = true; # Enable file navigation in pager
 
-      side-by-side = true;          # Enable split-screen diff view
+      side-by-side = true; # Enable split-screen diff view
       # syntax-theme = "Monokai Extended";  # Syntax highlighting theme
 
       # File header styling
@@ -1990,12 +2273,12 @@
       file-decoration-style = "yellow ul";
 
       # Line change styling
-      minus-style = "syntax #330000";       # Removed lines (dark red bg)
-      plus-style = "syntax #003300";        # Added lines (dark green bg)
-      minus-emph-style = "syntax #660000";  # Emphasized removed text
-      plus-emph-style = "syntax #006600";   # Emphasized added text
+      minus-style = "syntax #330000"; # Removed lines (dark red bg)
+      plus-style = "syntax #003300"; # Added lines (dark green bg)
+      minus-emph-style = "syntax #660000"; # Emphasized removed text
+      plus-emph-style = "syntax #006600"; # Emphasized added text
 
-      whitespace-error-style = "reverse red";  # Highlight trailing whitespace
+      whitespace-error-style = "reverse red"; # Highlight trailing whitespace
     };
   };
 
@@ -2020,17 +2303,17 @@
       # -----------------------------------------------------------------------
       # UI & Privacy
       # -----------------------------------------------------------------------
-      no-greeting = true;              # Skip copyright notice
-      no-emit-version = true;          # Don't include GPG version in output (privacy)
-      no-comments = false;             # Keep comment packets
-      export-options = "export-minimal";  # Export smallest key (removes old signatures)
+      no-greeting = true; # Skip copyright notice
+      no-emit-version = true; # Don't include GPG version in output (privacy)
+      no-comments = false; # Keep comment packets
+      export-options = "export-minimal"; # Export smallest key (removes old signatures)
 
       # -----------------------------------------------------------------------
       # Key Display & Verification
       # -----------------------------------------------------------------------
       # Show long key IDs (more secure than short 8-character IDs)
       keyid-format = "0xlong";
-      with-fingerprint = true;         # Always show fingerprints
+      with-fingerprint = true; # Always show fingerprints
 
       # Display trust/validity information
       list-options = "show-uid-validity";
@@ -2049,26 +2332,26 @@
       # Algorithm Enforcement (what you always use)
       # -----------------------------------------------------------------------
       # These settings enforce specific algorithms regardless of preferences
-      cipher-algo = "AES256";          # Always use AES256 for encryption
-      digest-algo = "SHA512";          # Always use SHA512 for hashing
-      cert-digest-algo = "SHA512";     # Use SHA512 when signing keys
-      compress-algo = "ZLIB";          # Use ZLIB compression
+      cipher-algo = "AES256"; # Always use AES256 for encryption
+      digest-algo = "SHA512"; # Always use SHA512 for hashing
+      cert-digest-algo = "SHA512"; # Use SHA512 when signing keys
+      compress-algo = "ZLIB"; # Use ZLIB compression
 
       # -----------------------------------------------------------------------
       # Security Hardening
       # -----------------------------------------------------------------------
       # Explicitly disable weak/old algorithms
-      disable-cipher-algo = "3DES";    # Block 3DES (old, weak)
-      weak-digest = "SHA1";            # Warn if SHA1 is used (deprecated)
+      disable-cipher-algo = "3DES"; # Block 3DES (old, weak)
+      weak-digest = "SHA1"; # Warn if SHA1 is used (deprecated)
 
       # -----------------------------------------------------------------------
       # Symmetric Encryption (S2K) Settings
       # -----------------------------------------------------------------------
       # When encrypting with a passphrase (not a key), use these settings
-      s2k-cipher-algo = "AES256";      # Cipher for passphrase encryption
-      s2k-digest-algo = "SHA512";      # Digest for passphrase hashing
-      s2k-mode = "3";                  # Iterated and salted (most secure mode)
-      s2k-count = "65011712";          # ~65M iterations (very high, very secure)
+      s2k-cipher-algo = "AES256"; # Cipher for passphrase encryption
+      s2k-digest-algo = "SHA512"; # Digest for passphrase hashing
+      s2k-mode = "3"; # Iterated and salted (most secure mode)
+      s2k-count = "65011712"; # ~65M iterations (very high, very secure)
 
       # -----------------------------------------------------------------------
       # Keyserver
@@ -2090,14 +2373,14 @@
 
     # Pinentry program for passphrase prompts
     # Options: pinentry-curses (CLI), pinentry-gnome3 (GUI/Wayland), pinentry-qt (Qt)
-    pinentry.package = pkgs.pinentry-gnome3;  # Works well with Wayland/Sway
+    pinentry.package = pkgs.pinentry-gnome3; # Works well with Wayland/Sway
 
     # -------------------------------------------------------------------------
     # Cache Settings
     # -------------------------------------------------------------------------
     # How long to cache passphrases in memory
-    defaultCacheTtl = 3600;      # Cache for 1 hour (3600 seconds)
-    maxCacheTtl = 7200;          # Maximum 2 hours, even with activity
+    defaultCacheTtl = 3600; # Cache for 1 hour (3600 seconds)
+    maxCacheTtl = 7200; # Maximum 2 hours, even with activity
 
     # SSH cache settings (only applies if enableSshSupport = true)
     defaultCacheTtlSsh = 3600;
@@ -2193,16 +2476,16 @@
         # -----------------------------------------------------------------------
         # Reuse existing connections for better performance
         # Multiple SSH sessions to the same host share one TCP connection
-        controlMaster = "auto";                              # Auto-create control socket
-        controlPath = "~/.ssh/sockets/%r@%h:%p";            # Socket location (%r=user, %h=host, %p=port)
-        controlPersist = "10m";                              # Keep connection alive for 10 min after last session
+        controlMaster = "auto"; # Auto-create control socket
+        controlPath = "~/.ssh/sockets/%r@%h:%p"; # Socket location (%r=user, %h=host, %p=port)
+        controlPersist = "10m"; # Keep connection alive for 10 min after last session
 
         # -----------------------------------------------------------------------
         # Keep-Alive Settings
         # -----------------------------------------------------------------------
         # Prevent disconnections due to idle timeout
-        serverAliveInterval = 60;      # Send keepalive packet every 60 seconds
-        serverAliveCountMax = 3;       # Disconnect after 3 failed keepalives (180 sec total)
+        serverAliveInterval = 60; # Send keepalive packet every 60 seconds
+        serverAliveCountMax = 3; # Disconnect after 3 failed keepalives (180 sec total)
 
         # -----------------------------------------------------------------------
         # Connection & Security
@@ -2305,8 +2588,8 @@
   # Works with the SSH config's "AddKeysToAgent yes" setting
   services.ssh-agent = {
     enable = true;
-    enableBashIntegration = true;  # Auto-export SSH_AUTH_SOCK in bash
-    enableZshIntegration = true;   # Auto-export SSH_AUTH_SOCK in zsh
+    enableBashIntegration = true; # Auto-export SSH_AUTH_SOCK in bash
+    enableZshIntegration = true; # Auto-export SSH_AUTH_SOCK in zsh
   };
 
   # ===========================================================================
@@ -2330,112 +2613,273 @@
 
     theme = {
       manager = {
-        cwd = { fg = "#ffffff"; };  # Current directory - emphasis
-        hovered = { fg = "#000000"; bg = "#b0b0b0"; };  # Selected item
-        preview_hovered = { underline = true; };
+        cwd = {
+          fg = "#ffffff";
+        }; # Current directory - emphasis
+        hovered = {
+          fg = "#000000";
+          bg = "#b0b0b0";
+        }; # Selected item
+        preview_hovered = {
+          underline = true;
+        };
 
-        find_keyword = { fg = "#d9ba73"; italic = true; };  # Search keyword - const
-        find_position = { fg = "#8ebeec"; bg = "reset"; italic = true; };  # Search position - info
+        find_keyword = {
+          fg = "#d9ba73";
+          italic = true;
+        }; # Search keyword - const
+        find_position = {
+          fg = "#8ebeec";
+          bg = "reset";
+          italic = true;
+        }; # Search position - info
 
-        marker_selected = { fg = "#8a9a7b"; bg = "#8a9a7b"; };  # Selected marker - green
-        marker_copied = { fg = "#d9ba73"; bg = "#d9ba73"; };  # Copied marker - yellow
-        marker_cut = { fg = "#ff7676"; bg = "#ff7676"; };  # Cut marker - danger
+        marker_selected = {
+          fg = "#8a9a7b";
+          bg = "#8a9a7b";
+        }; # Selected marker - green
+        marker_copied = {
+          fg = "#d9ba73";
+          bg = "#d9ba73";
+        }; # Copied marker - yellow
+        marker_cut = {
+          fg = "#ff7676";
+          bg = "#ff7676";
+        }; # Cut marker - danger
 
-        tab_active = { fg = "#000000"; bg = "#b0b0b0"; };  # Active tab
-        tab_inactive = { fg = "#50585d"; bg = "#000000"; };  # Inactive tab - comment
+        tab_active = {
+          fg = "#000000";
+          bg = "#b0b0b0";
+        }; # Active tab
+        tab_inactive = {
+          fg = "#50585d";
+          bg = "#000000";
+        }; # Inactive tab - comment
         tab_width = 1;
 
         border_symbol = "│";
-        border_style = { fg = "#50585d"; };  # Border - comment
+        border_style = {
+          fg = "#50585d";
+        }; # Border - comment
       };
 
       status = {
         separator_open = "";
         separator_close = "";
-        separator_style = { fg = "#50585d"; bg = "#50585d"; };  # comment
+        separator_style = {
+          fg = "#50585d";
+          bg = "#50585d";
+        }; # comment
 
-        mode_normal = { fg = "#000000"; bg = "#8ebeec"; bold = true; };  # info
-        mode_select = { fg = "#000000"; bg = "#d9ba73"; bold = true; };  # warning
-        mode_unset = { fg = "#000000"; bg = "#777777"; bold = true; };  # keyword
+        mode_normal = {
+          fg = "#000000";
+          bg = "#8ebeec";
+          bold = true;
+        }; # info
+        mode_select = {
+          fg = "#000000";
+          bg = "#d9ba73";
+          bold = true;
+        }; # warning
+        mode_unset = {
+          fg = "#000000";
+          bg = "#777777";
+          bold = true;
+        }; # keyword
 
-        progress_label = { fg = "#ffffff"; bold = true; };  # emphasis
-        progress_normal = { fg = "#8ebeec"; bg = "#272727"; };  # info/line
-        progress_error = { fg = "#ff7676"; bg = "#272727"; };  # danger/line
+        progress_label = {
+          fg = "#ffffff";
+          bold = true;
+        }; # emphasis
+        progress_normal = {
+          fg = "#8ebeec";
+          bg = "#272727";
+        }; # info/line
+        progress_error = {
+          fg = "#ff7676";
+          bg = "#272727";
+        }; # danger/line
 
-        permissions_t = { fg = "#8a9a7b"; };  # green
-        permissions_r = { fg = "#d9ba73"; };  # const/yellow
-        permissions_w = { fg = "#ff7676"; };  # danger
-        permissions_x = { fg = "#8ebeec"; };  # info
-        permissions_s = { fg = "#50585d"; };  # comment
+        permissions_t = {
+          fg = "#8a9a7b";
+        }; # green
+        permissions_r = {
+          fg = "#d9ba73";
+        }; # const/yellow
+        permissions_w = {
+          fg = "#ff7676";
+        }; # danger
+        permissions_x = {
+          fg = "#8ebeec";
+        }; # info
+        permissions_s = {
+          fg = "#50585d";
+        }; # comment
       };
 
       input = {
-        border = { fg = "#8ebeec"; };  # info
+        border = {
+          fg = "#8ebeec";
+        }; # info
         title = { };
         value = { };
-        selected = { reversed = true; };
+        selected = {
+          reversed = true;
+        };
       };
 
       select = {
-        border = { fg = "#8ebeec"; };  # info
-        active = { fg = "#ffffff"; };  # emphasis
+        border = {
+          fg = "#8ebeec";
+        }; # info
+        active = {
+          fg = "#ffffff";
+        }; # emphasis
         inactive = { };
       };
 
       tasks = {
-        border = { fg = "#8ebeec"; };  # info
+        border = {
+          fg = "#8ebeec";
+        }; # info
         title = { };
-        hovered = { underline = true; };
+        hovered = {
+          underline = true;
+        };
       };
 
       which = {
-        mask = { bg = "#000000"; };  # bg
-        cand = { fg = "#8ebeec"; };  # info
-        rest = { fg = "#50585d"; };  # comment
-        desc = { fg = "#b0b0b0"; };  # fg
+        mask = {
+          bg = "#000000";
+        }; # bg
+        cand = {
+          fg = "#8ebeec";
+        }; # info
+        rest = {
+          fg = "#50585d";
+        }; # comment
+        desc = {
+          fg = "#b0b0b0";
+        }; # fg
         separator = "  ";
-        separator_style = { fg = "#50585d"; };  # comment
+        separator_style = {
+          fg = "#50585d";
+        }; # comment
       };
 
       help = {
-        on = { fg = "#8a9a7b"; };  # green
-        run = { fg = "#8ebeec"; };  # info
-        desc = { fg = "#b0b0b0"; };  # fg
-        hovered = { bg = "#272727"; bold = true; };  # line
-        footer = { fg = "#000000"; bg = "#b0b0b0"; };  # fg bg reversed
+        on = {
+          fg = "#8a9a7b";
+        }; # green
+        run = {
+          fg = "#8ebeec";
+        }; # info
+        desc = {
+          fg = "#b0b0b0";
+        }; # fg
+        hovered = {
+          bg = "#272727";
+          bold = true;
+        }; # line
+        footer = {
+          fg = "#000000";
+          bg = "#b0b0b0";
+        }; # fg bg reversed
       };
 
       filetype = {
         rules = [
           # Media
-          { mime = "image/*"; fg = "#8ebeec"; }  # info/blue
-          { mime = "video/*"; fg = "#f54d27"; }  # orange
-          { mime = "audio/*"; fg = "#d9ba73"; }  # const/yellow
+          {
+            mime = "image/*";
+            fg = "#8ebeec";
+          } # info/blue
+          {
+            mime = "video/*";
+            fg = "#f54d27";
+          } # orange
+          {
+            mime = "audio/*";
+            fg = "#d9ba73";
+          } # const/yellow
 
           # Archives
-          { mime = "application/zip"; fg = "#ff7676"; }  # danger/red
-          { mime = "application/gzip"; fg = "#ff7676"; }
-          { mime = "application/x-tar"; fg = "#ff7676"; }
-          { mime = "application/x-bzip"; fg = "#ff7676"; }
-          { mime = "application/x-bzip2"; fg = "#ff7676"; }
-          { mime = "application/x-7z-compressed"; fg = "#ff7676"; }
-          { mime = "application/x-rar"; fg = "#ff7676"; }
+          {
+            mime = "application/zip";
+            fg = "#ff7676";
+          } # danger/red
+          {
+            mime = "application/gzip";
+            fg = "#ff7676";
+          }
+          {
+            mime = "application/x-tar";
+            fg = "#ff7676";
+          }
+          {
+            mime = "application/x-bzip";
+            fg = "#ff7676";
+          }
+          {
+            mime = "application/x-bzip2";
+            fg = "#ff7676";
+          }
+          {
+            mime = "application/x-7z-compressed";
+            fg = "#ff7676";
+          }
+          {
+            mime = "application/x-rar";
+            fg = "#ff7676";
+          }
 
           # Documents
-          { mime = "application/pdf"; fg = "#d9ba73"; }  # const
-          { mime = "text/*"; fg = "#8a9a7b"; }  # green
+          {
+            mime = "application/pdf";
+            fg = "#d9ba73";
+          } # const
+          {
+            mime = "text/*";
+            fg = "#8a9a7b";
+          } # green
 
           # Code
-          { name = "*.rs"; fg = "#f54d27"; }  # orange
-          { name = "*.go"; fg = "#8ebeec"; }  # info
-          { name = "*.py"; fg = "#d0bf41"; }  # yellow
-          { name = "*.js"; fg = "#d9ba73"; }  # const
-          { name = "*.ts"; fg = "#8ebeec"; }  # info
-          { name = "*.nix"; fg = "#8ebeec"; }  # info
+          {
+            name = "*.rs";
+            fg = "#f54d27";
+          } # orange
+          {
+            name = "*.go";
+            fg = "#8ebeec";
+          } # info
+          {
+            name = "*.py";
+            fg = "#d0bf41";
+          } # yellow
+          {
+            name = "*.js";
+            fg = "#d9ba73";
+          } # const
+          {
+            name = "*.ts";
+            fg = "#8ebeec";
+          } # info
+          {
+            name = "*.nix";
+            fg = "#8ebeec";
+          } # info
 
           # Special files
-          { name = "*"; is = "exec"; fg = "#8a9a7b"; }  # green
-          { name = "*"; is = "link"; fg = "#5abfb5"; }  # cyan
+          {
+            name = "*";
+            is = "exec";
+            fg = "#8a9a7b";
+          } # green
+          {
+            name = "*";
+            is = "link";
+            fg = "#5abfb5";
+          } # cyan
         ];
       };
     };
@@ -2445,12 +2889,12 @@
   # CURSOR THEME (System-wide for Wayland)
   # ===========================================================================
   home.pointerCursor = {
-    name = "macOS-White";  # Available themes: "macOS" (black) or "macOS-White"
+    name = "macOS-White"; # Available themes: "macOS" (black) or "macOS-White"
     package = pkgs.apple-cursor;
     size = 26;
-    gtk.enable = true;   # Apply to GTK apps
-    x11.enable = true;   # Apply to X11 apps
-    sway.enable = true;  # Apply to Sway/Wayland
+    gtk.enable = true; # Apply to GTK apps
+    x11.enable = true; # Apply to X11 apps
+    sway.enable = true; # Apply to Sway/Wayland
   };
 
   # ===========================================================================
@@ -2619,13 +3063,13 @@
     # -------------------------------------------------------------------------
     # Hooks run shell commands on tool lifecycle events (PreToolUse/PostToolUse).
     # WARN: Experemental. Check how it performs in the future.
-      hooks = {
-        PostToolUse = ''
-          if echo "$CLAUDE_TOOL_INPUT" | grep -q '\.nix"'; then
-            statix check . 2>/dev/null || true
-          fi
-        '';
-      };
+    hooks = {
+      PostToolUse = ''
+        if echo "$CLAUDE_TOOL_INPUT" | grep -q '\.nix"'; then
+          statix check . 2>/dev/null || true
+        fi
+      '';
+    };
 
     # -------------------------------------------------------------------------
     # MCP Servers (skipped for now)

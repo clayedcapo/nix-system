@@ -341,6 +341,7 @@
     zsh
     bash
     helix
+    neovim
     git
     git-lfs
     jujutsu
@@ -466,8 +467,8 @@
   # ENVIRONMENT
   # ===========================================================================
   environment.variables = {
-    EDITOR = "hx";
-    VISUAL = "hx";
+    EDITOR = "nvim";
+    VISUAL = "nvim";
   };
 
   # Add specific shells to /etc/shells to be able to log with them
@@ -623,6 +624,417 @@
   programs.throne = {
     enable = true;
     tunMode.enable = true;
+  };
+
+  # ===========================================================================
+  # NEOVIM (SYSTEM WIDE CONFIGURATION)
+  # ===========================================================================
+  programs.neovim = {
+    enable = true;
+    defaultEditor = true;
+    viAlias = true;
+    vimAlias = true;
+    configure = {
+      packages.myVimPackage.start = [
+        (pkgs.vimUtils.buildVimPlugin {
+          name = "koda-nvim";
+          src = pkgs.fetchFromGitHub {
+            owner = "oskarnurm";
+            repo = "koda.nvim";
+            rev = "main";
+            hash = "sha256-8tZWCL+XBFIiBeOOOnXG590irPRmhr23J4WhrPkGEzA";  # run build once to get the error with correct hash
+          };
+        })
+
+        # Prebuilt binaries
+        pkgs.vimPlugins.telescope-nvim
+        pkgs.vimPlugins.telescope-fzf-native-nvim
+        pkgs.vimPlugins.mini-nvim
+        pkgs.vimPlugins.nvim-notify
+        pkgs.vimPlugins.which-key-nvim
+        (pkgs.vimPlugins.nvim-treesitter.withPlugins (p: [
+          p.vim p.vimdoc p.zig p.c p.rust p.odin p.cpp p.go p.nix
+          p.html p.css p.javascript p.json p.lua p.markdown p.python
+          p.typescript p.bash
+        ]))
+        pkgs.vimPlugins.nvim-lspconfig
+        pkgs.vimPlugins.oil-nvim
+        pkgs.vimPlugins.oil-git-nvim
+        pkgs.vimPlugins.direnv-vim
+      ];
+      customLuaRC = ''
+    local opt = vim.opt
+
+    -- ========================================================================
+    -- OPTIONS
+    -- ========================================================================
+
+    opt.termguicolors = true
+    opt.number = true
+    opt.relativenumber = true
+    opt.wrap = false
+    opt.scrolloff = 10
+    opt.sidescrolloff = 5
+
+    opt.tabstop = 2
+    opt.shiftwidth = 2
+    opt.softtabstop = 2
+    opt.expandtab = true
+    opt.smartindent = true
+    opt.autoindent = true
+
+    opt.ignorecase = true
+    opt.smartcase = true
+    opt.hlsearch = true
+    opt.incsearch = true
+
+    opt.signcolumn = "yes"
+    opt.colorcolumn = "80,120"
+    opt.showmatch = true -- hightlights matching brackets
+    opt.cmdheight = 1
+    opt.completeopt = "menuone,noinsert,noselect"
+    opt.showmode = false
+    opt.pumheight = 10 -- popup menu height
+    opt.pumblend = 10 -- popup menu transparency
+    opt.conceallevel = 0 -- do not hide markup
+    opt.concealcursor = "" -- do not hide cursorline in markup
+    opt.synmaxcol = 300 -- syntax hightlighting limit
+    opt.fillchars = { eob = " " } -- hide '~' on empty lines
+
+    local undodir = vim.fn.expand("~/.vim/undodir")
+    if
+      vim.fn.isdirectory(undodir) == 0
+    then
+      vim.fn.mkdir(undodir, "p")
+    end
+
+    opt.backup = false
+    opt.writebackup = false
+    opt.swapfile = false
+    opt.undofile = true
+    opt.undodir = undodir
+    opt.updatetime = 300
+    opt.timeoutlen = 500
+    opt.ttimeoutlen = 0
+    opt.autoread = true
+    opt.autowrite = false
+
+    opt.hidden = true
+    opt.errorbells = false
+    opt.backspace = "indent,eol,start"
+    opt.autochdir = false
+    opt.iskeyword:append("-")
+    opt.path:append("**")
+    opt.selection = "inclusive"
+    opt.mouse = "a"
+    opt.clipboard:append("unnamedplus")
+    opt.modifiable = true
+
+    opt.guicursor = "n-v-c-sm:block,r-cr:hor20,o:hor50,a:blinkon0"
+
+    -- Folding, requires treesitter available at runtime; safe fallback if not
+    opt.foldmethod = "expr"
+    opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+    opt.foldlevel = 99
+
+    opt.splitbelow = true
+    opt.splitright = true
+
+    opt.wildmenu = true
+    opt.wildmode = "longest:full,full"
+    opt.diffopt:append("linematch:60")
+    opt.redrawtime = 10000
+    opt.maxmempattern = 20000
+
+    -- ========================================================================
+    -- KEYBINDINGS
+    -- ========================================================================
+
+    vim.g.mapleader = " "
+    vim.g.maplocalleader = " "
+
+    local keymap = vim.keymap
+
+    keymap.set("n", "j", function()
+      return vim.v.count == 0 and "gj" or "j"
+    end, { expr = true, silent = true, desc = "Down (wrap-aware)" })
+    keymap.set("n", "k", function()
+      return vim.v.count == 0 and "gk" or "k"
+    end, { expr = true, silent = true, desc = "Up (wrap-aware)" })
+
+    keymap.set("n", "<Esc><Esc>", ":nohlsearch<CR>", { desc = "Clear search highlights" })
+
+    keymap.set("n", "n", "nzzzv", { desc = "Next search result (centered)" })
+    keymap.set("n", "N", "Nzzzv", { desc = "Next search result (centered)" })
+    keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Half page down (centered)" })
+    keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Half page down (centered)" })
+
+    keymap.set("x", "<leader>p", '"_dP', { desc = "Paste without yanking" })
+    keymap.set({ "n", "v" }, "<leader>x", '"_d', { desc = "Delete without yanking" })
+
+    keymap.set("n", "<leader>bn", ":bnext<CR>", { desc = "Next buffer" })
+    keymap.set("n", "<leader>bp", ":bprevious<CR>", { desc = "Previous buffer" })
+
+    keymap.set("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase window height" })
+    keymap.set("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease window height" })
+    keymap.set("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease window width" })
+    keymap.set("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase window width" })
+
+    keymap.set("n", "<A-j>", ":m .+1<CR>==", { desc = "Move line down" })
+    keymap.set("n", "<A-k>", ":m .-2<CR>==", { desc = "Move line up" })
+    keymap.set("v", "<A-j>", ":m '>+1<CR>gv==gv", { desc = "Move selection down" })
+    keymap.set("v", "<A-k>", ":m '<-2<CR>gv==gv", { desc = "Move selection up" })
+
+    keymap.set("v", "<", "<gv", { desc = "Indent left and reselect" })
+    keymap.set("v", ">", ">gv", { desc = "Indent right and reselect" })
+
+    keymap.set("n", "J", "mzJ`z", { desc = "Join lines and keep cursor position" })
+
+    keymap.set("n", "<leader>pa", function()
+      local path = vim.fn.expand("%:p")
+      vim.fn.setreg("+", path)
+      print("file:", path)
+    end, { desc = "Copy file full path" })
+
+    keymap.set("n", "<leader>td", function()
+      vim.diagnostic.enable(not vim.diagnostic.is_enabled())
+    end, { desc = "Toggle diagnostics" })
+
+    keymap.set("n", "<leader>dl", vim.diagnostic.open_float, { desc = "Show line diagnostics" })
+
+    -- ========================================================================
+    -- AUTOCMDS
+    -- ========================================================================
+
+    local augroup = vim.api.nvim_create_augroup("UserConfig", { clear = true })
+
+    -- Highlight yanked text
+    vim.api.nvim_create_autocmd("TextYankPost", {
+      group = augroup,
+      callback = function()
+        vim.hl.on_yank()
+      end
+    })
+
+    -- Restore last cursor position
+    vim.api.nvim_create_autocmd("BufReadPost", {
+      group = augroup,
+      desc = "Restore last cursor position",
+      callback = function()
+        if vim.o.diff then
+          return
+        end
+
+        local last_pos = vim.api.nvim_buf_get_mark(0, '"')
+        local last_line = vim.api.nvim_buf_line_count(0)
+
+        local row = last_pos[1]
+        if row < 1 or row > last_line then
+          return
+        end
+
+        pcall(vim.api.nvim_win_set_cursor, 0, last_pos)
+      end,
+    })
+
+    vim.api.nvim_create_autocmd("FileType", {
+      group = augroup,
+      pattern = { "markdown", "text", "gitcommit" },
+      callback = function()
+        vim.opt_local.wrap = true
+        vim.opt_local.linebreak = true
+        vim.opt_local.spell = true
+      end,
+    })
+
+    -- ========================================================================
+    -- COLORSCHEME
+    -- ========================================================================
+
+    vim.cmd.colorscheme("koda")
+
+    -- Tweaks: differences from the Helix koda variant
+    local hl = vim.api.nvim_set_hl
+
+    -- Pure black background (original koda uses #101010)
+    hl(0, "Normal",   { fg = "#b0b0b0", bg = "#000000" })
+    hl(0, "NormalNC", { bg = "#000000" })
+
+    -- String/Character: muted green instead of white
+    hl(0, "String",    { fg = "#8a9a7b" })
+    hl(0, "Character", { fg = "#8a9a7b" })
+
+    -- Success color: muted green instead of bright green (#86cd82 → #8aa372)
+    -- DiffAdd bg is blend(success, bg, 0.2) recalculated for the new colors
+    hl(0, "GitSignsAdd",  { fg = "#8aa372" })
+    hl(0, "DiffAdd",      { fg = "#8aa372", bg = "#1b2117" })
+    hl(0, "DiagnosticOk", { fg = "#8aa372" })
+
+    -- ========================================================================
+    -- PLUGINS
+    -- ========================================================================
+    local actions = require "telescope.actions"
+    local builtin = require "telescope.builtin"
+    require("telescope").setup{
+      defaults = {
+        preview = { treesitter = true },
+        color_devicons = true,
+        sorting_strategy = "ascending",
+        borderchars = {
+          "", -- top
+          "", -- right
+          "", -- bottom
+          "", -- left
+          "", -- top-left
+          "", -- top-right
+          "", -- bottom-right
+          "", -- bottom-left
+        },
+        path_display = { "smart" },
+        layout_config = {
+          height = 100,
+          width = 400,
+          prompt_position = "top",
+          preview_cutoff = 40,
+        },
+      },
+      extensions = {
+        fzf = {
+          fuzzy = true,
+          override_generic_sorter = true,
+          override_file_sorter = true,
+          case_mode = "smart_case",
+        }
+      },
+    }
+
+    require("telescope").load_extension("fzf")
+
+    keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Telescope find files" })
+    keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Telescope live grep" })
+    keymap.set("n", "<leader>fss", builtin.grep_string, { desc = "Telescope grep selected string" })
+    keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Telescope buffers" })
+    keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Telescope help tags" })
+    keymap.set("n", "<leader>fc", builtin.commands, { desc = "Telescope nvim commands" })
+    keymap.set("n", "<leader>fmp", builtin.man_pages, { desc = "Telescope man pages" })
+    keymap.set("n", "<leader>fvo", builtin.vim_options, { desc = "Telescope vim options" })
+    keymap.set("n", "<leader>fr", builtin.registers, { desc = "Telescope registers" })
+    keymap.set("n", "<leader>fau", builtin.autocommands, { desc = "Telescope autocommands" })
+    keymap.set("n", "<leader>fzf", builtin.current_buffer_fuzzy_find, { desc = "Telescope fuzzy search current buffer" })
+    keymap.set("n", "<leader>fd", builtin.diagnostics, { desc = "Telescope LSP diagnostics" })
+    keymap.set("n", "<leader>flr", builtin.lsp_references, { desc = "Telescope LSP references" })
+    keymap.set("n", "<leader>fli", builtin.lsp_implementations, { desc = "Telescope LSP implementations" })
+
+    require("mini.ai").setup({})
+    require("mini.comment").setup({})
+    require("mini.move").setup({})
+    require("mini.pairs").setup({})
+    require("mini.splitjoin").setup({})
+    require("mini.surround").setup({})
+    require("mini.bracketed").setup({})
+    require("mini.diff").setup({})
+    -- mini.diff: match Helix koda diff colors
+    -- Sign column (diff.plus/minus/delta)
+    hl(0, "MiniDiffSignAdd",    { fg = "#8aa372" })
+    hl(0, "MiniDiffSignChange", { fg = "#d9ba73" })
+    hl(0, "MiniDiffSignDelete", { fg = "#ff7676" })
+    -- Overlay: added/deleted/changed (bg = 20% blend of fg color into #000000)
+    hl(0, "MiniDiffOverAdd",       { fg = "#8aa372", bg = "#1b2117" })
+    hl(0, "MiniDiffOverDelete",    { fg = "#ff7676", bg = "#331717" })
+    hl(0, "MiniDiffOverChange",    { fg = "#d9ba73", bg = "#2b2517" })
+    hl(0, "MiniDiffOverChangeBuf", { fg = "#d9ba73", bg = "#2b2517" })
+    -- Overlay: context lines (comment color on line bg)
+    hl(0, "MiniDiffOverContext",    { fg = "#50585d", bg = "#272727" })
+    hl(0, "MiniDiffOverContextBuf", { fg = "#50585d", bg = "#272727" })
+    require("mini.git").setup({})
+    require("mini.jump").setup({})
+    require("mini.jump2d").setup({})
+    require("mini.cursorword").setup({})
+    -- require("mini.hipatterns").setup({})
+    require("mini.icons").setup({})
+    require("mini.icons").mock_nvim_web_devicons()
+    require("mini.statusline").setup({})
+    -- mini.statusline: match Helix koda statusline colors
+    -- Mode pills (ui.statusline.normal/insert/select/…)
+    hl(0, "MiniStatuslineModeNormal",  { fg = "#000000", bg = "#8ebeec", bold = true })
+    hl(0, "MiniStatuslineModeInsert",  { fg = "#000000", bg = "#8a9a7b", bold = true })
+    hl(0, "MiniStatuslineModeVisual",  { fg = "#000000", bg = "#d9ba73", bold = true })
+    hl(0, "MiniStatuslineModeReplace", { fg = "#000000", bg = "#ff7676", bold = true })
+    hl(0, "MiniStatuslineModeCommand", { fg = "#000000", bg = "#777777", bold = true })
+    hl(0, "MiniStatuslineModeOther",   { fg = "#b0b0b0", bg = "#272727", bold = true })
+    -- Statusline body sections (ui.statusline)
+    hl(0, "MiniStatuslineFilename", { fg = "#b0b0b0", bg = "#000000" })
+    hl(0, "MiniStatuslineDevinfo",  { fg = "#b0b0b0", bg = "#000000" })
+    hl(0, "MiniStatuslineFileinfo", { fg = "#b0b0b0", bg = "#000000" })
+    -- Inactive window statusline (ui.statusline.inactive)
+    hl(0, "MiniStatuslineInactive", { fg = "#50585d", bg = "#000000" })
+    require("mini.tabline").setup({})
+
+    require("notify").setup({
+      background_colour = "#000000",
+      stages = "slide",
+      timeout = 3000,
+      max_width = 60,
+    })
+    vim.notify = require("notify")
+
+    require("which-key").setup({})
+
+    keymap.set("n", "<leader>?", function() require("which-key").show({ global = false }) end,
+      { desc = "Buffer local keymaps (which-key)" })
+
+    vim.api.nvim_create_autocmd("FileType", {
+      group = augroup,
+      callback = function(args)
+        pcall(vim.treesitter.start, args.buf)
+      end,
+    })
+
+    local lspconfig = require("lspconfig")
+    local capabilities = vim.lsp.protocol.make_client_capabilities()
+
+    local on_attach = function(_, buf)
+      local k = function(keys, func, desc)
+        keymap.set("n", keys, func, { buffer = buf, desc = desc })
+      end
+      k("gd", vim.lsp.buf.definition, "Go to definition (LSP)")
+      k("gD", vim.lsp.buf.declaration, "Go to declaration (LSP)")
+      k("gr", vim.lsp.buf.references, "References (LSP)")
+      k("gi", vim.lsp.buf.implementation, "Go to implementation (LSP)")
+      k("K", vim.lsp.buf.hover, "Hover docs (LSP)")
+      k("<leader>rn", vim.lsp.buf.rename, "Rename (LSP)")
+      k("<leader>ca", vim.lsp.buf.code_action, "Code action (LSP)")
+      k("<leader>f", vim.lsp.buf.format, "Format (LSP)")
+    end
+
+    for _, server in ipairs({
+      "zls",
+      "rust_analyzer",
+      "clangd",
+      "nil_ls",
+      "gopls",
+      "pyright",
+      "ts_ls",
+      "lua_ls",
+    }) do
+      lspconfig[server].setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+      })
+    end
+
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      group = augroup,
+      callback = function()
+        vim.lsp.buf.format({ async = false, timeout_ms = 2000 })
+      end,
+    })
+
+    require("oil").setup({})
+
+    keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory (Oil)"} )
+    '';
+    };
   };
 
   # ===========================================================================
