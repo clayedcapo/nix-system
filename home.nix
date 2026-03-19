@@ -353,6 +353,11 @@
 
       prompt pure
 
+      # Prevent Ghostty shell integration from wrapping PROMPT (conflicts with Pure)
+      # Pure manages its own prompt rendering asynchronously; Ghostty's OSC 133
+      # injection causes the path to render twice.
+      typeset -g GHOSTTY_SHELL_INTEGRATION_NO_PROMPT=1
+
       # -----------------------------------------------------------------------
       # Navigation & Directory Options
       # -----------------------------------------------------------------------
@@ -1434,50 +1439,50 @@
         "shift+enter=text:\x1b\r"
 
         # Pass ctrl+a through to the shell when pressed twice (readline: go to line start)
-        "ctrl+a>ctrl+a=text:\x01"
+        # "ctrl+a>ctrl+a=text:\x01"
 
         # -----------------------------------------------------------------------
         # Split management (ctrl+a leader)
         # -----------------------------------------------------------------------
-        "ctrl+a>shift+backslash=new_split:right"   # | → split right
-        "ctrl+a>minus=new_split:down"               # - → split down
-        "ctrl+a>x=close_surface"                    # x → close pane
-        "ctrl+a>z=toggle_split_zoom"                # z → zoom pane
-        "ctrl+a>e=equalize_splits"                  # e → equalize splits
+        "ctrl+q>shift+backslash=new_split:right" # | → split right
+        "ctrl+q>minus=new_split:down" # - → split down
+        "ctrl+q>x=close_surface" # x → close pane
+        "ctrl+q>z=toggle_split_zoom" # z → zoom pane
+        "ctrl+q>e=equalize_splits" # e → equalize splits
 
         # -----------------------------------------------------------------------
-        # Split navigation (ctrl+a leader, vim-style)
+        # Split navigation (ctrl+q leader, vim-style)
         # -----------------------------------------------------------------------
-        "ctrl+a>h=goto_split:left"
-        "ctrl+a>j=goto_split:bottom"
-        "ctrl+a>k=goto_split:top"
-        "ctrl+a>l=goto_split:right"
+        "ctrl+q>h=goto_split:left"
+        "ctrl+q>j=goto_split:bottom"
+        "ctrl+q>k=goto_split:top"
+        "ctrl+q>l=goto_split:right"
 
         # -----------------------------------------------------------------------
-        # Split resizing (ctrl+a leader, shift+hjkl)
+        # Split resizing (ctrl+q leader, shift+hjkl)
         # -----------------------------------------------------------------------
-        "ctrl+a>shift+h=resize_split:left,40"
-        "ctrl+a>shift+j=resize_split:down,40"
-        "ctrl+a>shift+k=resize_split:up,40"
-        "ctrl+a>shift+l=resize_split:right,40"
+        "ctrl+q>shift+h=resize_split:left,40"
+        "ctrl+q>shift+j=resize_split:down,40"
+        "ctrl+q>shift+k=resize_split:up,40"
+        "ctrl+q>shift+l=resize_split:right,40"
 
         # -----------------------------------------------------------------------
         # Tab management
         # -----------------------------------------------------------------------
-        "ctrl+a>c=new_tab"                          # c → new tab
-        "alt+h=previous_tab"                        # Alt+h → previous tab
-        "alt+l=next_tab"                            # Alt+l → next tab
+        "ctrl+q>c=new_tab" # c → new tab
+        "alt+h=previous_tab" # Alt+h → previous tab
+        "alt+l=next_tab" # Alt+l → next tab
 
         # Go to tab by number
-        "ctrl+a>one=goto_tab:1"
-        "ctrl+a>two=goto_tab:2"
-        "ctrl+a>three=goto_tab:3"
-        "ctrl+a>four=goto_tab:4"
-        "ctrl+a>five=goto_tab:5"
-        "ctrl+a>six=goto_tab:6"
-        "ctrl+a>seven=goto_tab:7"
-        "ctrl+a>eight=goto_tab:8"
-        "ctrl+a>nine=goto_tab:9"
+        "ctrl+q>one=goto_tab:1"
+        "ctrl+q>two=goto_tab:2"
+        "ctrl+q>three=goto_tab:3"
+        "ctrl+q>four=goto_tab:4"
+        "ctrl+q>five=goto_tab:5"
+        "ctrl+q>six=goto_tab:6"
+        "ctrl+q>seven=goto_tab:7"
+        "ctrl+q>eight=goto_tab:8"
+        "ctrl+q>nine=goto_tab:9"
       ];
 
       # -----------------------------------------------------------------------
