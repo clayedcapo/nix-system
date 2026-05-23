@@ -22,33 +22,6 @@
 # | - pkgs-unstable: Unstable package set (from specialArgs)
 # | - username: Your username (from specialArgs)
 # | - hostname: Your hostname (from specialArgs)
-let
-  # Definition for a jai package, probably should move it to another module in the future
-  jaiMinor = "2";
-  jaiPatch = "009";
-  jaiZip = pkgs.stdenv.mkDerivation {
-    name = "jai-zip";
-    src = pkgs.requireFile {
-      name = "jai-beta-${jaiMinor}-${jaiPatch}.zip";
-      sha256 = "sha256-2KX5wusIpMu59Q80VDc4S0Z5wEAC5gCrAT1z45D8jkc=";
-      message = ''
-        Jai is in closed beta. Download the zip and run:
-          nix-store --add-fixed sha256 jai-beta-${jaiMinor}-${jaiPatch}.zip
-      '';
-    };
-    nativeBuildInputs = [ pkgs.unzip ];
-    buildCommand = ''
-      unzip $src -d $out
-      chmod -R +x $out/jai/bin
-    '';
-  };
-  jai = pkgs.buildFHSEnv {
-    pname = "jai";
-    version = "0.${jaiMinor}.${jaiPatch}";
-    targetPkgs = p: [ p.zlib ];
-    runScript = "${jaiZip}/jai/bin/jai-linux";
-  };
-in
 {
   # NOTE: Here should be specified all additional modules that are shared among all hosts
   # imports = [ ];
@@ -389,9 +362,6 @@ in
   # They are kept here to make them available to root. With useGlobalPkgs = true,
   # both reference the same store path — no disk duplication.
   environment.systemPackages = with pkgs; [
-    # TODO: move it to home.nix after future refactoring
-    jai
-
     # Basic utilities
     zsh
     bash
@@ -732,16 +702,6 @@ in
             repo = "koda.nvim";
             rev = "main";
             hash = "sha256-8tZWCL+XBFIiBeOOOnXG590irPRmhr23J4WhrPkGEzA"; # run build once to get the error with correct hash
-          };
-        })
-
-        (pkgs.vimUtils.buildVimPlugin {
-          name = "jai-vim";
-          src = pkgs.fetchFromGitHub {
-            owner = "rluba";
-            repo = "jai.vim";
-            rev = "master";
-            hash = "sha256-VFNIcJmz44y/1TzJ8IpB5US5VYZwWL7FhjZC4vKOuoQ=";
           };
         })
 
